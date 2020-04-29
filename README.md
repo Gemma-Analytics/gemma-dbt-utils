@@ -20,7 +20,7 @@ models:
     columns:
       - name: a_number
         tests:
-          - dbt_utils.numeric_constraints:
+          - gemma_dbt_utils.numeric_constraints:
               gte: 0
               lt: 180
 ```
@@ -49,4 +49,19 @@ models:
           - dbt_utils.numeric_constraints:
               eq: 1
               condition: "status = 'success'"
+```
+
+### unique_where ([source](macros/schema_tests/unique_where.sql))
+This schema test is a variant of the unique test that applies a where condition. Useful whenever you need to validate a join on some form of id that is not unique per se, but should be unique in combination with a second condition.
+
+Usage:
+```yaml
+version: 2
+models:
+  - name: model_name
+    columns:
+      - name: col_a
+        tests:
+          - gemma_dbt_utils.unique_where:
+              where: "col_b = 5"
 ```
