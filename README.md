@@ -46,7 +46,7 @@ models:
     columns:
       - name: a_number
         tests:
-          - dbt_utils.numeric_constraints:
+          - gemma_dbt_utils.numeric_constraints:
               eq: 1
               condition: "status = 'success'"
 ```

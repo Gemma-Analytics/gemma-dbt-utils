@@ -5,11 +5,11 @@ models:
     columns:
     - name: vat_pct
       tests:
-        - dbt_utils.numeric_constraints:
+        - gemma_dbt_utils.numeric_constraints:
             gte: 0
             ne: 0.5
             lt: 1
-        - dbt_utils.numeric_constraints:
+        - gemma_dbt_utils.numeric_constraints:
             eq: 0
             condition: "(status = 'done') and (type = 'international')"
 
@@ -17,7 +17,7 @@ models:
     columns:
     - name: part
       tests:
-        - unique_where:
+        - gemma_dbt_utils.unique_where:
             where: "car = 'panamera'"
-        - unique_where:
+        - gemma_dbt_utils.unique_where:
             where: "car = 'golf'"
