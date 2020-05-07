@@ -1,20 +1,26 @@
-{% macro create_funcs(field_type_list=none, func_name_list=none) %}
+{% macro create_funcs(field_type_list, func_name_list=none) %}
 
   {% set type_list_len = field_type_list|length %}
 
-  {% set name_list_len = func_name_list|length %}
+  {% set name_list_len = func_name_list|length if func_name_list is not none else 0 %}
 
-  {% if name_list_len != type_list_len %}
+  {% if func_name_list and name_list_len != type_list_len %}
 
     {{ exceptions.raise_compiler_error("Error: Name and type list dont have the same length.") }}
 
   {% endif %}
 
-  {{ log("geschafft", info=True) }}
+  {% for i in range(0, type_list_len) %}
 
-  {% for i in range(0, name_list_len) %}
+    {% if func_name_list %}
 
-      {{ create_func_is_type(field_type[i], func_name[i]) }}
+      {{ gemma_dbt_utils.create_func_is_type(field_type_list[i], func_name_list[i] )}}
+
+    {% else %}
+
+      {{ gemma_dbt_utils.create_func_is_type(field_type_list[i]) }}
+
+    {% endif %}
 
   {% endfor %}
 
