@@ -1,16 +1,14 @@
-{%- macro grant_read(users=none, schemas_list=none, include_main_schema=true) -%}
+{%- macro grant_read(users, schemas_list=none, include_main_schema=true) -%}
+
+  {% do schemas_list.append(target.schema) if include_main_schema and schemas_list %}
 
   {% for user in users %}
 
     {% if schemas_list %}
 
-      {% if include_main_schema %}
-
-        {% do schemas_list.append(target.schema) %}
-
-      {% endif %}
-
       {% for schema in schemas_list %}
+
+          {% set schema = target.schema+'_'+schema if schema!=target.schema else schema %}
 
           grant usage on schema {{ schema }} to {{ user }};
           grant select on all tables in schema {{ schema }} to {{ user }};
