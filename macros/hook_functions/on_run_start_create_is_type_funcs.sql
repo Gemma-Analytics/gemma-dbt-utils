@@ -1,12 +1,16 @@
 {% macro create_is_type_funcs(field_type_list, func_name_list=none) %}
 
+  {% set field_type_list = gemma_dbt_utils.arg_into_list(field_type_list) %}
+
+  {% set func_name_list = gemma_dbt_utils.arg_into_list(func_name_list) %}
+
   {% set type_list_len = field_type_list|length %}
 
   {% set name_list_len = func_name_list|length if func_name_list is not none else 0 %}
 
   {% if func_name_list and name_list_len != type_list_len %}
 
-    {{ exceptions.raise_compiler_error("Error: Name and type list dont have the same length.") }}
+    {{ exceptions.raise_compiler_error("Error: Name and type lists dont have the same length.") }}
 
   {% endif %}
 
@@ -14,11 +18,11 @@
 
     {% if func_name_list %}
 
-      {{ gemma_dbt_utils.create_func_is_type(field_type_list[i], func_name_list[i] )}}
+      {{ gemma_dbt_utils.create_is_type_func(field_type_list[i], func_name_list[i] )}}
 
     {% else %}
 
-      {{ gemma_dbt_utils.create_func_is_type(field_type_list[i]) }}
+      {{ gemma_dbt_utils.create_is_type_func(field_type_list[i]) }}
 
     {% endif %}
 
