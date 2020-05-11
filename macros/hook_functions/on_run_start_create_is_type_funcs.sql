@@ -1,4 +1,4 @@
-{% macro create_funcs(field_type_list, func_name_list=none) %}
+{% macro create_is_type_funcs(field_type_list, func_name_list=none) %}
 
   {% set type_list_len = field_type_list|length %}
 
@@ -28,7 +28,7 @@
 
 -------------------------------------------------------------------------------
 
-{% macro create_func_is_type(field_type, func_name=none) %}
+{% macro create_is_type_func(field_type, func_name=none) %}
 
   {% if not func_name %}
 
