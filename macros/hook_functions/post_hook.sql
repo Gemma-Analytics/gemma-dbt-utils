@@ -1,10 +1,6 @@
 {%- macro post_hook_index(target_column, unique=none, method=none) -%}
 
-  {%- if unique == 'unique' or unique == true -%}
-    {%- set unique = 'unique'  -%}
-  {%- else -%}
-    {%- set unique = '' -%}
-  {%- endif -%}
+  {%- set unique = 'unique' if unique == 'unique' or unique == true else '' -%}
 
   create {{ unique }} index if not exists
   {{ this.table }}__index_on_{{ target_column }} on {{ this }}
