@@ -2,7 +2,7 @@
 {# Method checks if arg is string, number or boolean
    and creates a list with that arg inside #}
 
-  {%- if arg is string or arg is number or arg is boolean -%}
+  {%- if arg is string or arg is number or arg is sameas false or arg is sameas true -%}
 
     {%- set temp = [] -%}
 
@@ -13,5 +13,5 @@
   {%- endif -%}
 
   {{ return(arg) }}
-  
+
 {%- endmacro -%}
