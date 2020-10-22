@@ -27,33 +27,37 @@
 
 --------------------------------------------------------------------------------
 
-
 {% macro create_index_if_col_exists(table_model, column) %}
   {#
-    Find out whether column exists at all. Only if it does, create the index.
+    Create index function - allow setting a high level config by failing
+    gracefully if the column to be indexed does not exist. E.g. we can
+    configure all tables to have an index on "id", but not fail the dbt run if
+    any one table does not have an id column.
 
     Arguments:
       table_model   relation    e.g. {{ this }}
       column        string      e.g. "id"
 
+    Note: arg column is not quoted, if your column required quoting it needs
+    to be quoted by the calling function, e.g. "'Id'"
+
     sample usage:
     {{ gemma_dbt_utils.create_index_if_col_exists(this, "id") }}
   #}
-  {% if execute %}
-    {%- set column_list_query -%}
-      SELECT COUNT(column_name)
+  DO
+  $$
+  BEGIN
+   IF EXISTS (
+      SELECT 1
       FROM {{ source('information_schema', 'columns') }}
       WHERE table_schema = '{{ table_model.schema }}'
         AND table_name = '{{ table_model.identifier }}'
         AND column_name = '{{ column }}'
-    {%- endset -%}
+    ) THEN
+      CREATE INDEX IF NOT EXISTS "_dbt_idx_{{ table_model.table }}_{{ column }}"
+        ON {{ table_model }} ({{ column }});
+   END IF;
+  END
+  $$;
 
-    {% set cq = run_query(column_list_query) %}
-
-    {% if cq.columns[0].values()[0] == 1 %}
-      create index if not exists
-        _dbt_idx_{{ table_model.table }}_{{ column }}
-        on {{ table_model }} ("{{ column }}")
-    {% endif %}
-  {% endif %}
 {% endmacro %}
