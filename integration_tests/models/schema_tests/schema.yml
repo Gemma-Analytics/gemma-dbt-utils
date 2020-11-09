@@ -12,12 +12,3 @@ models:
         - gemma_dbt_utils.numeric_constraints:
             eq: 0
             condition: "(status = 'done') and (type = 'international')"
-
-  - name: data_test_unique_where
-    columns:
-    - name: part
-      tests:
-        - gemma_dbt_utils.unique_where:
-            where: "car = 'panamera'"
-        - gemma_dbt_utils.unique_where:
-            where: "car = 'golf'"
