@@ -28,7 +28,8 @@ WITH rates AS (
     , adjclose AS fx_rate_usd
     , COALESCE( -- the GENERATE_SERIES below throws out the very last day otherwise!
           LEAD(formatted_date::DATE) OVER w
-        , (formatted_date::DATE + INTERVAL '1 day')::DATE
+        , (NOW()::DATE + INTERVAL '1 day')::DATE
+        -- use NOW() to ensure that date series runs to current date even on holidays!
       ) AS next_date
     , ROW_NUMBER() OVER w AS temp_partition
   FROM rates

@@ -10,6 +10,10 @@ seeds:
 
 sources:
   - name: fx
+    quoting:
+      database: true
+      schema: true
+      identifier: true
     schema: integration_tests # appropriate seed files as models for tests
     tables:
       - name: eur
