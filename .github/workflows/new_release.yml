@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies for GitHub release script
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade pyyaml
+          pip install --upgrade pyyaml requests
       - name: Run new release Python script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # To authenticate POST
