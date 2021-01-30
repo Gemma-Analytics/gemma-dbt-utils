@@ -3,10 +3,6 @@ Gemma Analytics utilities for dbt
 
 This packages is expected to be used in addition to [dbt-utils](https://github.com/fishtown-analytics/dbt-utils) and expands upon it rather than replacing it.
 
-## TBU
-- Licence
-- Properly implement integration tests
-
 ## Models
 
 These models are deactivated by default, but can be activatd and configured using variables in your `dbt_project.yml` file.
