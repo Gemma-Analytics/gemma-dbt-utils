@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: fx
+    schema: raw_fx
+    tables:
+      - name: eur
+        identifier: daily_fx_rates_usd_eur
+      - name: chf
+        identifier: daily_fx_rates_usd_chf

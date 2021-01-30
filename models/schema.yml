@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: gemma_fx
+    description: "A model containing exchange rate data: one row per date and currency."
+    tests:
+      - unique:
+          column_name: concat(date, fx_currency)
+    columns:
+      - name: date
+        description: The date that this row's exchange rate relates to.
+        tests:
+          - not_null
+      - name: fx_currency
+        description: The source currency relating to the row's exchange rate.
+        tests:
+          - not_null
+      - name: base_currency
+        description: The base currency relating to the row's exchange rate.
+        tests:
+          - not_null
+      - name: fx_rate
+        description: Multiply an amount in the source currency aka fx_currency with the fx_rate to get an equivalent amount in the base currency.
+        tests:
+          - not_null
