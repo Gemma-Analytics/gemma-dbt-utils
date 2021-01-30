@@ -26,10 +26,13 @@ WITH rates AS (
       formatted_date::DATE AS date
     , currency
     , adjclose AS fx_rate_usd
-    , LEAD(formatted_date::DATE) OVER w AS next_date
+    , COALESCE( -- the GENERATE_SERIES below throws out the very last day otherwise!
+          LEAD(formatted_date::DATE) OVER w
+        , (formatted_date::DATE + INTERVAL '1 day')::DATE
+      ) AS next_date
     , ROW_NUMBER() OVER w AS temp_partition
   FROM rates
-  WHERE NOT adjclose IS NULL
+  WHERE NOT NULLIF(adjclose, 0) IS NULL -- throw out rows without proper fx rate
   WINDOW w AS (PARTITION BY currency ORDER BY formatted_date::DATE ASC)
 
 ), add_missing_dates AS (
