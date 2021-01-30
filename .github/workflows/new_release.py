@@ -9,6 +9,7 @@ Steps:
 import requests
 import os
 import yaml
+import json
 
 
 def main():
@@ -52,7 +53,12 @@ def main():
         }
         print("\n\nCreating new release {0}...\n\n".format(release_version))
         new_release = requests.post(
-            url, headers={"Authorization": "token {0}".format(github_token)}, data=data
+            url,
+            headers={
+                "Accept": "application/vnd.github.v3+json",
+                "Authorization": "token {0}".format(github_token),
+            },
+            data=json.dumps(data),
         )
         assert new_release.status_code == 201, new_release.text
         print("\n\nNew release created:\n", new_release.json())
