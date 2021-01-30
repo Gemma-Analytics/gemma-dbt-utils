@@ -23,4 +23,4 @@ jobs:
       - name: Run new release Python script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # To authenticate POST
-        run: python new_release.py
+        run: python .github/workflows/new_release.py
