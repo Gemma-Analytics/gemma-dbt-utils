@@ -1,5 +1,6 @@
 name: 'gemma_dbt_utils'
 version: '0.2.3'
+config-version: 2
 
 require-dbt-version: '>=0.14.0'
 
