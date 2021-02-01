@@ -1,6 +1,6 @@
 version: 2
 
-models:
+seeds:
   - name: data_test_numeric_constraints
     columns:
     - name: vat_pct
