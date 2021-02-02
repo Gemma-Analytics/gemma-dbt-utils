@@ -24,7 +24,7 @@ Make sure all contributions have the following:
 
 ## Models
 
-These models are deactivated by default, but can be activatd and configured using variables in your `dbt_project.yml` file.
+These models are deactivated by default, but can be activated and configured using variables in your `dbt_project.yml` file.
 
 ### FX aka Exchange Rates
 
