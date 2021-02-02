@@ -7,7 +7,7 @@ WITH rates AS (
     SELECT
         {{ var('gemma:fx:column_date') }} AS date
       , '{{ currency|upper() }}' AS currency
-      , {{ ('gemma:fx:column_rate') }} AS fx_rate
+      , {{ var('gemma:fx:column_rate') }} AS fx_rate
     FROM {{ var(source_table, source_table) }}
     {# Checks if there is a variable called source_table. If there is not, source_table
     may already be the name of the table. #}
