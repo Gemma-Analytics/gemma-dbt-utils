@@ -1,9 +1,11 @@
+config-version: 2
+
 name: 'dbt_utils_integration_tests'
 version: '1.0'
 
 profile: 'integration_tests'
 
-require-dbt-version: ">=0.15.1"
+require-dbt-version: ">=0.17.0"
 
 source-paths: ["models"]
 analysis-paths: ["analysis"]
@@ -15,3 +17,13 @@ target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
     - "target"
     - "dbt_modules"
+
+vars:
+  # Set variables to configure the Gemma dbt utils package
+  'gemma:fx:currencies':
+    EUR: 'gemma:fx:eur'
+    CHF: 'gemma:fx:chf'
+  'gemma:fx:eur': "{{ source('fx', 'eur') }}"
+  'gemma:fx:chf': "{{ source('fx', 'chf') }}"
+  'gemma:fx:base_currency': EUR
+  'gemma:fx:enabled': true

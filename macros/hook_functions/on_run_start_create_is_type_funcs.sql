@@ -44,7 +44,7 @@
   {%- endif -%}
   -- Adapted from
   -- https://stackoverflow.com/questions/16195986/isnumeric-with-postgresql
-  CREATE SCHEMA IF NOT EXISTS "{{ taget.schema }}";
+  CREATE SCHEMA IF NOT EXISTS "{{ target.schema }}";
   CREATE OR REPLACE FUNCTION "{{ target.schema }}"."{{ func_name }}"(text) RETURNS BOOLEAN AS $$
   DECLARE x {{ field_type }};
   BEGIN

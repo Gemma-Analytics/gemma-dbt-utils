@@ -1,9 +1,33 @@
-name: 'gemma_dbt_utils'
-version: '0.2.7'
+config-version: 2
 
-require-dbt-version: '>=0.14.0'
+name: 'gemma_dbt_utils'
+version: '0.2.9'
+
+require-dbt-version: '>=0.17.0'
+
+profile: 'gemma_dbt_utils_profile'
 
 target-path: "target"
-clean-targets: ["target", "dbt_modules"]
-macro-paths: ["macros"]
+clean-targets:
+  - "target"
+  - "dbt_modules"
 log-path: "logs"
+
+macro-paths: ["macros"]
+source-paths: ["models"]
+
+vars:
+  # Variables related to the fx model
+  'gemma:fx:currencies':
+     EUR: 'gemma:fx:eur'  # define currency as other variables, or ...
+     CHF: 'raw_fx.daily_fx_rates_usd_chf'  # ... name table directly
+  # 'gemma:fx:eur': "{{ source('fx', 'eur') }}"  # must use this approach to use source macro
+  'gemma:fx:enabled': false  # overwrite this variable to enable the fx model
+  'gemma:fx:base_currency': 'USD' # overwrite to get a different default value
+
+models:
+  gemma_dbt_utils:
+    # Defaults for all models in package
+    +schema: gemma_dbt_utils
+    +tags: gemma_dbt_utils
+    +materialized: table
