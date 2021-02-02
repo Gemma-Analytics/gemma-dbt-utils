@@ -3,6 +3,25 @@ Gemma Analytics utilities for dbt
 
 This packages is expected to be used in addition to [dbt-utils](https://github.com/fishtown-analytics/dbt-utils) and expands upon it rather than replacing it.
 
+## Installation
+
+Install this package in your project by adding it to your `packages.yml`:
+
+```yaml
+packages:
+  - git: https://github.com/Gemma-Analytics/gemma-dbt-utils
+    revision: v0.2.9  # Appropriate GitHub Release tag
+```
+
+## Contributing
+
+Feel free to open PRs into the `staging` branch. Any releases will be done via PRs from `staging` into `master`.
+
+Make sure all contributions have the following:
+- Sample data and usecases in the `integration_tests`
+- Tests for correct behavior in the `integration_tests`
+- Appropriate documentation in this README and, for models, in the appropriate schema.yml as well
+
 ## Models
 
 These models are deactivated by default, but can be activatd and configured using variables in your `dbt_project.yml` file.
@@ -15,11 +34,13 @@ You can configure it using variables:
 
 | Variables | Default | Purpose |
 | --- | --- | -- |
-| gemma:fx:currencies | --- | Required Dictionary. Dictionary of currencies and their source. |
+| gemma:fx:currencies | --- | Required Dictionary. Dictionary of currencies and their source.* |
 | gemma:fx:base_currency | USD | String. Primary currency ticker. Model will calculate exchange rates relative to this currency. If not USD, must be a key in gemma:fx:currencies. |
 | gemma:fx:enabled | false | Boolean. Set to true to activate the model. |
+| gemma:fx:column_date | formatted_date::DATE | Date column in the source data.  |
+| gemma:fx:column_rate | adjclose | FX Rate column in the source data. Data shall be in USD/XXX format. E.g. on 2021-02-02 the USD/EUR value was roughly 0.83. |
 
-The `gemma:fx:currencies` variable takes the currency as key and the table as value. To use the sources macro, which is recommended, supply the name of another variable as value, and set the variable to use the sources macro. It may look like this in your project's `dbt_project.yml` file:
+*The `gemma:fx:currencies` variable takes the currency as key and the table as value. To use the sources macro, which is recommended, supply the name of another variable as value, and set the variable to use the sources macro. It may look like this in your project's `dbt_project.yml` file:
 
 ```yaml
 vars:
