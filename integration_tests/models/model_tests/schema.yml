@@ -6,7 +6,11 @@ seeds:
   - name: models_gemma_fx_raw_data_usd_eur
     description: Sample raw FX rates from Yahoo Finance (USDEUR)
   - name: models_gemma_fx_result_eur_chf
-    description: Correct EURCHF fx rates based on USDCHF and USDEUR. Test gemma_fx with this data.
+    description: Correct EURCHF fx rates based on USDCHF and USDEUR.
+                 Test gemma_fx with this data.
+  - name: models_gemma_ga4_events
+    description: Google Analytics 4 event example data set
+                 that covers all fields.
 
 sources:
   - name: fx
@@ -20,3 +24,13 @@ sources:
         identifier: models_gemma_fx_raw_data_usd_eur
       - name: chf
         identifier: models_gemma_fx_raw_data_usd_chf
+
+  - name: bq
+    quoting:
+      database: true
+      schema: true
+      identifier: true
+    schema: integration_tests # appropriate seed files as models for tests
+    tables:
+      - name: events
+        identifier: models_gemma_ga4_events

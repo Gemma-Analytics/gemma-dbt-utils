@@ -26,11 +26,18 @@ vars:
   'gemma:fx:enabled': false  # overwrite this variable to enable the fx model
   'gemma:fx:base_currency': 'USD' # overwrite to get a different default value
 
-  'gemma:ga4:enabled': false
+  'gemma:ga4:enabled': true
+  'gemma:ga4:source': "{{ source('bq', 'events') }}"
+  'gemma:ga4:table': "raw_bq.events" # alternative if no source.yml is used
   'gemma:ga4:arrays':
-    - event_params
-    - user_properties
-    #- items
+    event_params:
+      ga_session_id: BIGINT
+      ga_session_number: INT
+      engagement_time_msec: BIGINT
+      session_engaged: BOOLEAN
+    user_properties:
+      user_id:
+    # items: to be added..
 
 
 models:

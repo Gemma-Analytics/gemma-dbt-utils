@@ -27,3 +27,31 @@ vars:
   'gemma:fx:chf': "{{ source('fx', 'chf') }}"
   'gemma:fx:base_currency': EUR
   'gemma:fx:enabled': true
+
+  'gemma:ga4:enabled': true
+  'gemma:ga4:source': "{{ source('bq', 'events') }}"
+  'gemma:ga4:table': "raw_bq.events"
+  'gemma:ga4:arrays':
+    event_params:
+      ga_session_id: BIGINT
+      ga_session_number: INT
+      engagement_time_msec: BIGINT
+      gclid:
+      campaign:
+      content:
+      medium:
+      source:
+      search_term:
+      term:
+      page_referrer:
+      page_path:
+      page_location:
+      page_title:
+      link_url:
+      outbound: BOOLEAN
+      session_engaged: BOOLEAN
+      engaged_session_event: BOOLEAN
+    user_properties:
+      user_id:
+      set_timestamp_micros: BIGINT
+    # items: to be added..

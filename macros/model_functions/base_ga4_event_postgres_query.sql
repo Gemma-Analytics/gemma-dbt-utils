@@ -1,19 +1,23 @@
-{% macro base_ga4_events_postgres_query() %}
+{% macro base_ga4_event_postgres_query() %}
 
 {{ config(enabled=var("gemma:ga4:enabled")) }}
 
   WITH events AS (
 
-    SELECT 1
+    SELECT * FROM {{ var("gemma:ga4:source") }}
 
   ), transforms AS (
 
     SELECT
-        {{ dbt_utils.surrogate_key(
-          ["user_pseudo_id", "event_timestamp", "event_name", "event_params"]
-        ) }} AS event_id
+        MD5(CAST(CONCAT(
+          COALESCE(CAST(user_pseudo_id AS VARCHAR), ''), '-',
+          COALESCE(CAST(event_timestamp AS VARCHAR), ''), '-',
+          COALESCE(CAST(event_name AS VARCHAR), ''), '-',
+          COALESCE(CAST(event_params AS VARCHAR), '')
+        ) AS VARCHAR)) AS event_id
       , DATE(TO_TIMESTAMP(
-          event_timestamp/1000000) AT TIME ZONE '{{ var('gemma:general:timezone') }}')
+          event_timestamp/1000000)
+            AT TIME ZONE '{{ var('gemma:general:timezone') }}')
         AS event_date
       , TO_TIMESTAMP(event_timestamp/1000000) AS event_at
       , event_timestamp
@@ -55,7 +59,7 @@
 
     FROM events
 
-  {% for array in var('gemma:ga4:arrays') %}
+  {%- for array in var('gemma:ga4:arrays') %}
 
 ), {{ array }}_cte AS (
 
@@ -70,22 +74,22 @@
           )
         ) AS {{ array }}
 
-    {% if array == 'user_properties' %}
+    {%- if array == 'user_properties' %}
 
       , jsonb_object_agg({{ array }}.value->>'key',
             {{ array }}.value->'value'->>'set_timestamp_micros'
-        ) AS user_properties_timestamp
+        ) AS {{ array }}_timestamp
 
-    {% endif %}
+    {%- endif %}
 
     FROM transforms
-      LEFT JOIN jsonb_array_elements({{ array }})
+      LEFT JOIN jsonb_array_elements({{ array }}) AS {{ array }}
         ON TRUE
     WHERE {{ array }}.value->>'key' IS NOT NULL
 
     GROUP BY 1
 
-    {% endfor %}
+    {% endfor -%}
 
   ), joins AS (
 
@@ -127,41 +131,29 @@
       , transforms.country
       , transforms.continent
       , transforms.sub_continent
-      , (params.event_params->>'ga_session_id')::BIGINT AS session_id
-      , (params.event_params->>'ga_session_number')::INT AS session_number
-      , (params.event_params->>'engagement_time_msec')::BIGINT
-        AS engagement_time_msec
-      , params.event_params->>'gclid' AS gcl_id
-      , params.event_params->>'campaign' AS session_campaign
-      , params.event_params->>'content' AS session_content
-      , params.event_params->>'medium' AS session_medium
-      , params.event_params->>'source' AS session_source
-      , params.event_params->>'search_term' AS session_search_term
-      , params.event_params->>'term' AS session_term
-      , params.event_params->>'page_referrer' AS page_referrer
-      , params.event_params->>'page_path' AS page_path
-      , params.event_params->>'page_location' AS page_location
-      , params.event_params->>'page_title' AS page_title
-      , params.event_params->>'link_url' AS link_url
-      , (params.event_params->>'outbound')::BOOLEAN AS is_link_outbound
-      , (params.event_params->>'session_engaged')::BOOLEAN
-        AS is_engaged_session
-      , (params.event_params->>'engaged_session_event')::BOOLEAN
-        AS is_engaged_session_event
-      , params.event_params
-      , props.user_props->>'user_id' AS user_id
-      , (props.user_properties_timestamp->>'user_id')::BIGINT AS user_id_timestamp
-      , TO_TIMESTAMP(
-          (props.user_properties_timestamp->>'user_id')::BIGINT/1000000)
-        AS user_id_set_at
+      {%- for array_name in var('gemma:ga4:arrays') %}
+
+      , {{ array_name }}_cte.{{ array_name }}
+
+      {%- endfor -%}
+
+      {% for array_name, field in var('gemma:ga4:arrays').items() %}
+        {%- for field_name, type in field.items() %}
+
+      , ({{ array_name }}_cte.{{ array_name }}->>'{{ field_name }}')
+            {%- if type -%} ::{{ type }} {%- endif %}
+        AS {{ array_name }}_{{ field_name }}
+
+         {%- endfor %}
+      {%- endfor %}
 
     FROM transforms
     {% for array in var('gemma:ga4:arrays') %}
 
       LEFT JOIN {{ array }}_cte
-        ON transforms.event_id = {{ array }}.event_id
+        ON transforms.event_id = {{ array }}_cte.event_id
 
-    {% endfor %}
+    {%- endfor %}
 
   ), calculations AS (
 
@@ -183,36 +175,18 @@
           WHEN utm_medium ~ E'^(display|cpm|banner)$' THEN 'Display'
           ELSE '(Other)'
         END AS default_channel_grouping
-      , CASE
-          WHEN session_source = '(direct)' AND (session_medium = '(not set)'
-            OR session_medium = '(none)') THEN 'Direct'
-          WHEN session_medium = 'organic' THEN 'Organic search'
-          WHEN session_medium ~ E'^(social|social-network|social-media|sm|)$'
-            OR session_medium ~ E'^(social network|social media)$' THEN 'Social'
-          WHEN session_medium = 'email' THEN 'Email'
-          WHEN session_medium = 'affiliate' THEN 'Affiliates'
-          WHEN session_medium = 'referral' THEN 'Referral'
-          WHEN session_medium ~ E'^(cpc|ppc|paidsearch)$' THEN 'Paid Search'
-          WHEN session_medium ~ E' ^(cpv|cpa|cpp|content-text)$'
-            THEN 'Other Advertising'
-          WHEN session_medium ~ E'^(display|cpm|banner)$' THEN 'Display'
-          ELSE '(Other)'
-        END AS session_default_channel_grouping
       , EXTRACT(EPOCH FROM
-          MAX(event_at) OVER (PARTITION BY user_pseudo_id, session_id)
-          - MIN(event_at) OVER (PARTITION BY user_pseudo_id, session_id))
-        AS session_length_sec
+          MAX(event_at) OVER
+            (PARTITION BY user_pseudo_id, event_params_ga_session_id)
+          - MIN(event_at) OVER
+            (PARTITION BY user_pseudo_id, event_params_ga_session_id)
+        ) AS session_length_sec
       , CASE
-          WHEN event_name = 'session_start' AND session_number = 1
+          WHEN event_name = 'session_start'
+            AND event_params_ga_session_number = 1
             THEN 1
           ELSE 0
         END AS is_new_user
-      , CASE
-          WHEN is_engaged_session
-            THEN CONCAT(user_pseudo_id, session_id)
-          ELSE NULL
-        END AS engaged_session_id
-      , CONCAT(user_pseudo_id, session_id) AS unique_session_id
 
     FROM joins
 

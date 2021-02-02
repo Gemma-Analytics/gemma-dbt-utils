@@ -2,7 +2,8 @@ version: 2
 
 models:
   - name: gemma_fx
-    description: "A model containing exchange rate data: one row per date and currency."
+    description: "A model containing exchange rate data:
+                  one row per date and currency."
     tests:
       - unique:
           column_name: concat(date, fx_currency)
@@ -20,6 +21,23 @@ models:
         tests:
           - not_null
       - name: fx_rate
-        description: Multiply an amount in the source currency aka fx_currency with the fx_rate to get an equivalent amount in the base currency.
+        description: Multiply an amount in the source currency aka fx_currency
+                     with the fx_rate to get an equivalent amount in the base
+                     currency.
         tests:
+          - not_null
+
+  - name: gemma_ga4_events
+    description: "A model containing Google Analytics 4 events.
+                  Contains all fields but some nested from these there:
+                  user_properties, event_params and items.
+                  Explicit fields from those can be selected in the
+                  projects YAML."
+    columns:
+      - name: event_id
+        description: In the model created Id. Made out of the unique
+                     combination of user_pseudo_id, event_timestamp,
+                     event_name and event_params.
+        tests:
+          - unique
           - not_null
