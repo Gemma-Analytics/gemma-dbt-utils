@@ -17,7 +17,7 @@
         ) AS VARCHAR)) AS event_id
       , DATE(TO_TIMESTAMP(
           event_timestamp/1000000)
-            AT TIME ZONE '{{ var('gemma:general:timezone') }}')
+            AT TIME ZONE '{{ var('gemma:dates:timezone') }}')
         AS event_date
       , TO_TIMESTAMP(event_timestamp/1000000) AS event_at
       , event_timestamp

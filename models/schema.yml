@@ -41,3 +41,52 @@ models:
         tests:
           - unique
           - not_null
+
+  - name: gemma_dates
+    description: Date dimensional table. Creates a date series from a start_date
+                 defined in the project until 30 days from now. Generates also
+                 diverse date columns for a date like weekday, isoweek, etc.
+    columns:
+      - name: date_id
+        description: Increasing Id from the first date in the table.
+        tests:
+          - unique
+          - not_null
+      - name: date
+        tests:
+          - unique
+          - not_null
+      - name: year
+        description: Number of the year of the date.
+      - name: iso_year
+        description: ISO year of the date.
+      - name: year_start
+        description: First date of the year of the date.
+      - name: quarter
+        description: Number of the quarter of the date.
+      - name: quarter_start
+        description: First date of the quarter of the date.
+      - name: month
+        description: Number of the month of the date.
+      - name: month_start
+        description: First date of the month of the date.
+      - name: week
+        description: Number of the week of the date.
+      - name: week_start
+        description: First date of the week of the date.
+      - name: iso_week
+        description: Shows the ISO year and the ISO week number of the date.
+      - name: iso_weekday
+        description: Day of the ISO week, Monday = 1 to Sunday = 7.
+      - name: weekday
+        description: Day of the week, Sunday = 0 to Saturday = 6.
+      - name: day
+        description: Day of the month.
+      - name: day_num
+        description: Day of the year.
+      - name: day_name
+        description: First 3 letters of the written weekday name.
+      - name: month_num
+        description: Number of the month starting from first month in the table.
+      - name: week_num
+        description: Number of the week starting from first week in the table.
