@@ -27,45 +27,85 @@
       , event_name
       , stream_id::BIGINT AS stream_id
       , event_bundle_sequence_id
-      , traffic_source->>'name' AS utm_campaign
-      , traffic_source->>'medium' AS utm_medium
-      , traffic_source->>'source' AS utm_source
-      , platform
-      , (user_ltv->>'revenue')::NUMERIC AS revenue
-      , user_ltv->>'currency' AS currency
       , items
       , event_params
       , user_properties
-      , device->>'browser' AS device_browser
-      , device->>'category' AS device_category
-      , device->>'language' AS device_language
-      , device->>'vendor_id' AS device_vendor_id
-      , device->>'advertising_id' AS device_advertising_id
-      , device->>'browser_version' AS device_browser_version
-      , device->>'operation_system' AS device_operating_system
-      , device->>'mobile_brand_name' AS device_mobile_brand_name
-      , device->>'mobile_model_name' AS device_mobile_model_name
-      , device->>'mobile_marketing_name' AS device_mobile_marketing_name
-      , device->>'is_limited_ad_tracking' AS is_limited_ad_tracking
-      , device->>'mobile_os_hardware_model' AS device_mobile_os_hardware_model
-      , device->>'operating_system_version' AS device_operating_system_version
-      , device->>'time_zone_offset_seconds' AS device_time_zone_offset_seconds
-      , geo->>'city' AS city
-      , geo->>'metro' AS metro
-      , geo->>'region' AS region
-      , geo->>'country' AS country
-      , geo->>'continent' AS continent
-      , geo->>'sub_continent' AS sub_continent
+      , event_dimensions
+      , platform
+  {# extract values from event properties #}
+  {%- for property in var('gemma:ga4:properties') -%}
+    {%- if property == 'app_info' %}
+      , {{ property }}->>'id' AS {{ property}}_id
+      , {{ property }}->>'version' AS {{ property}}_version
+      , {{ property }}->>'install_store' AS {{ property}}_install_store
+      , {{ property }}->>'firebase_app_id' AS {{ property}}_firebase_app_id
+      , {{ property }}->>'install_source' AS {{ property}}_install_source
+
+    {%- elif property == 'device' %}
+      , {{ property }}->>'browser' AS {{ property }}_browser
+      , {{ property }}->>'category' AS {{ property }}_category
+      , {{ property }}->>'language' AS {{ property }}_language
+      , {{ property }}->>'vendor_id' AS {{ property }}_vendor_id
+      , {{ property }}->>'advertising_id' AS {{ property }}_advertising_id
+      , {{ property }}->>'browser_version' AS {{ property }}_browser_version
+      , {{ property }}->>'operating_system' AS {{ property }}_operating_system
+      , {{ property }}->>'mobile_brand_name' AS {{ property }}_mobile_brand_name
+      , {{ property }}->>'mobile_model_name' AS {{ property }}_mobile_model_name
+      , {{ property }}->>'mobile_marketing_name' AS {{ property }}_mobile_marketing_name
+      , {{ property }}->>'is_limited_ad_tracking' AS {{ property }}_is_limited_ad_tracking
+      , {{ property }}->>'mobile_os_hardware_model' AS {{ property }}_mobile_os_hardware_model
+      , {{ property }}->>'operating_system_version' AS {{ property }}_operating_system_version
+      , {{ property }}->>'time_zone_offset_seconds' AS {{ property }}_time_zone_offset_seconds
+      , {{ property }}->'web_info'->>'browser' AS {{ property }}_web_info_browser
+      , {{ property }}->'web_info'->>'browser_version' AS {{ property }}_web_info_browser_version
+      , {{ property }}->'web_info'->>'hostname' AS {{ property }}_web_info_hostname
+
+    {%- elif property == 'ecommerce' %}
+      , {{ property }}->>'total_item_quantity' AS {{ property }}_total_item_quantity
+      , {{ property }}->>'purchase_revenue_in_usd' AS {{ property }}_purchase_revenue_in_usd
+      , {{ property }}->>'purchase_revenue' AS {{ property }}_purchase_revenue
+      , {{ property }}->>'refund_value_in_usd' AS {{ property }}_refund_value_in_usd
+      , {{ property }}->>'refund_revenue' AS {{ property }}_refund_value
+      , {{ property }}->>'shipping_value_in_usd' AS {{ property }}_shipping_value_in_usd
+      , {{ property }}->>'shipping_value' AS {{ property }}_shipping_value
+      , {{ property }}->>'tax_value_in_usd' AS {{ property }}_tax_value_in_usd
+      , {{ property }}->>'tax_value' AS {{ property }}_tax_value
+      , {{ property }}->>'unique_items' AS {{ property }}_unique_items
+      , {{ property }}->>'transaction_id' AS {{ property }}_transaction_id
+
+    {%- elif property == 'geo' %}
+      , {{ property }}->>'city' AS {{ property }}_city
+      , {{ property }}->>'metro' AS {{ property }}_metro
+      , {{ property }}->>'region' AS {{ property }}_region
+      , {{ property }}->>'country' AS {{ property }}_country
+      , {{ property }}->>'continent' AS {{ property }}_continent
+      , {{ property }}->>'sub_continent' AS {{ property }}_sub_continent
+
+    {%- elif property == 'traffic_source' %}
+      , {{ property }}->>'name' AS {{ property }}_campaign
+      , {{ property }}->>'medium' AS {{ property }}_medium
+      , {{ property }}->>'source' AS {{ property }}_source
+
+    {%- elif property == 'user_ltv' %}
+      , {{ property }}->>'revenue' AS {{ property }}_revenue
+      , {{ property }}->>'currency' AS {{ property }}_currency
+
+    {%- endif -%}
+  {%- endfor %}
 
     FROM events
 
+  {# unnest arrays and put the elements later into a dictionary #}
   {%- for array in var('gemma:ga4:arrays') %}
 
-), {{ array }}_cte AS (
+    {% if array == 'items' -%}
+     {# CATCH ITEMS ARRAY, items array should be unnested in an own model #}
+    {% else -%}
+
+  ), {{ array }}_cte AS (
 
     SELECT
         event_id
-
       , jsonb_object_agg({{ array }}.value->>'key', COALESCE(NULL
             , {{ array }}.value->'value'->>'int_value'
             , {{ array }}.value->'value'->>'float_value'
@@ -73,14 +113,14 @@
             , {{ array }}.value->'value'->>'string_value'
           )
         ) AS {{ array }}
-
-    {%- if array == 'user_properties' %}
+      {# user_properties have two values in the same dictionary value of a key #}
+      {%- if array == 'user_properties' %}
 
       , jsonb_object_agg({{ array }}.value->>'key',
             {{ array }}.value->'value'->>'set_timestamp_micros'
         ) AS {{ array }}_timestamp
 
-    {%- endif %}
+      {%- endif %}
 
     FROM transforms
       LEFT JOIN jsonb_array_elements({{ array }}) AS {{ array }}
@@ -89,7 +129,9 @@
 
     GROUP BY 1
 
-    {% endfor -%}
+  {%- endif -%}
+
+  {%- endfor %}
 
   ), joins AS (
 
@@ -104,83 +146,128 @@
       , transforms.event_name
       , transforms.stream_id
       , transforms.event_bundle_sequence_id
-      , transforms.utm_campaign
-      , transforms.utm_medium
-      , transforms.utm_source
       , transforms.platform
-      , transforms.revenue
-      , transforms.currency
+  {# create columns based on the chosen properties #}
+  {% for property in var('gemma:ga4:properties') -%}
+    {%- if property == 'app_info' %}
+      , transforms.{{ property }}_id
+      , transforms.{{ property }}_version
+      , transforms.{{ property }}_install_store
+      , transforms.{{ property }}_firebase_app_id
+      , transforms.{{ property }}_install_source
+
+    {%- elif property == 'device' %}
+      , transforms.{{ property }}_browser
+      , transforms.{{ property }}_category
+      , transforms.{{ property }}_language
+      , transforms.{{ property }}_vendor_id
+      , transforms.{{ property }}_advertising_id
+      , transforms.{{ property }}_browser_version
+      , transforms.{{ property }}_operating_system
+      , transforms.{{ property }}_mobile_brand_name
+      , transforms.{{ property }}_mobile_model_name
+      , transforms.{{ property }}_mobile_marketing_name
+      , transforms.{{ property }}_is_limited_ad_tracking
+      , transforms.{{ property }}_mobile_os_hardware_model
+      , transforms.{{ property }}_operating_system_version
+      , transforms.{{ property }}_time_zone_offset_seconds
+
+    {%- elif property == 'ecommerce' %}
+      , transforms.{{ property }}_total_item_quantity
+      , transforms.{{ property }}_purchase_revenue_in_usd
+      , transforms.{{ property }}_purchase_revenue
+      , transforms.{{ property }}_refund_value_in_usd
+      , transforms.{{ property }}_refund_value
+      , transforms.{{ property }}_shipping_value_in_usd
+      , transforms.{{ property }}_shipping_value
+      , transforms.{{ property }}_tax_value_in_usd
+      , transforms.{{ property }}_tax_value
+      , transforms.{{ property }}_unique_items
+      , transforms.{{ property }}_transaction_id
+
+    {%- elif property == 'geo' %}
+      , transforms.{{ property }}_city
+      , transforms.{{ property }}_metro
+      , transforms.{{ property }}_region
+      , transforms.{{ property }}_country
+      , transforms.{{ property }}_continent
+      , transforms.{{ property }}_sub_continent
+
+    {%- elif property == 'traffic_source' %}
+      , transforms.{{ property }}_campaign
+      , transforms.{{ property }}_medium
+      , transforms.{{ property }}_source
+
+    {%- elif property == 'user_ltv' %}
+      , transforms.{{ property }}_revenue
+      , transforms.{{ property }}_currency
+
+    {%- endif -%}
+  {%- endfor %}
       , transforms.items
-      , transforms.device_browser
-      , transforms.device_category
-      , transforms.device_language
-      , transforms.device_vendor_id
-      , transforms.device_advertising_id
-      , transforms.device_browser_version
-      , transforms.device_operating_system
-      , transforms.device_mobile_brand_name
-      , transforms.device_mobile_model_name
-      , transforms.device_mobile_marketing_name
-      , transforms.is_limited_ad_tracking
-      , transforms.device_mobile_os_hardware_model
-      , transforms.device_operating_system_version
-      , transforms.device_time_zone_offset_seconds
-      , transforms.city
-      , transforms.metro
-      , transforms.region
-      , transforms.country
-      , transforms.continent
-      , transforms.sub_continent
-      {%- for array_name in var('gemma:ga4:arrays') %}
-
+  {# create unnested array columns event_params, user properties but not items
+     items should be unnested in an additional model later #}
+  {%- for array_name in var('gemma:ga4:arrays') %}
+    {%- if array_name == 'items' -%}
+     {# CATCH ITEMS ARRAY, items array should be unnested in an own model #}
+    {%- else %}
       , {{ array_name }}_cte.{{ array_name }}
+    {% endif -%}
+  {% endfor -%}
 
-      {%- endfor -%}
-
-      {% for array_name, field in var('gemma:ga4:arrays').items() %}
-        {%- for field_name, type in field.items() %}
+  {# Interate over the chosen event parameters #}
+  {%- for array_name, field in var('gemma:ga4:arrays').items() %}
+    {% if array_name == 'items' -%}
+     {# CATCH ITEMS ARRAY, items array should be unnested in an own model #}
+    {% else -%}
+    {%- for field_name, type in field.items() %}
 
       , ({{ array_name }}_cte.{{ array_name }}->>'{{ field_name }}')
             {%- if type -%} ::{{ type }} {%- endif %}
         AS {{ array_name }}_{{ field_name }}
 
-         {%- endfor %}
-      {%- endfor %}
+     {%- endfor %}
+     {%- endif %}
+  {%- endfor %}
 
     FROM transforms
-    {% for array in var('gemma:ga4:arrays') %}
+  {%- for array in var('gemma:ga4:arrays') %}
 
       LEFT JOIN {{ array }}_cte
         ON transforms.event_id = {{ array }}_cte.event_id
 
-    {%- endfor %}
+  {% endfor -%}
 
-  ), calculations AS (
+  ), final AS (
 
     SELECT
         *
       , CASE
-          WHEN utm_source = '(direct)' AND (utm_medium = '(not set)'
-            OR utm_medium = '(none)')
-              THEN 'Direct'
-          WHEN utm_medium = 'organic' THEN 'Organic search'
-          WHEN utm_medium ~ E'^(social|social-network|social-media|sm|)$'
-              OR utm_medium ~ E'^(social network|social media)$' THEN 'Social'
-          WHEN utm_medium = 'email' THEN 'Email'
-          WHEN utm_medium = 'affiliate' THEN 'Affiliates'
-          WHEN utm_medium = 'referral' THEN 'Referral'
-          WHEN utm_medium ~ E'^(cpc|ppc|paidsearch)$' THEN 'Paid Search'
-          WHEN utm_medium ~ E' ^(cpv|cpa|cpp|content-text)$'
+          WHEN traffic_source_source = '(direct)'
+            AND (traffic_source_medium = '(not set)'
+              OR traffic_source_medium = '(none)')
+            THEN 'Direct'
+          WHEN traffic_source_medium = 'organic'
+            THEN 'Organic search'
+          WHEN traffic_source_medium ~ E'^(social|social-network|social-media|sm|)$'
+              OR traffic_source_medium ~ E'^(social network|social media)$'
+            THEN 'Social'
+          WHEN traffic_source_medium = 'email'
+            THEN 'Email'
+          WHEN traffic_source_medium = 'affiliate'
+            THEN 'Affiliates'
+          WHEN traffic_source_medium = 'referral'
+            THEN 'Referral'
+          WHEN traffic_source_medium ~ E'^(cpc|ppc|paidsearch)$'
+            THEN 'Paid Search'
+          WHEN traffic_source_medium ~ E' ^(cpv|cpa|cpp|content-text)$'
             THEN 'Other Advertising'
-          WHEN utm_medium ~ E'^(display|cpm|banner)$' THEN 'Display'
+          WHEN traffic_source_medium ~ E'^(display|cpm|banner)$'
+            THEN 'Display'
           ELSE '(Other)'
         END AS default_channel_grouping
-      , EXTRACT(EPOCH FROM
-          MAX(event_at) OVER
-            (PARTITION BY user_pseudo_id, event_params_ga_session_id)
-          - MIN(event_at) OVER
-            (PARTITION BY user_pseudo_id, event_params_ga_session_id)
-        ) AS session_length_sec
+      , EXTRACT(EPOCH FROM MAX(event_at) OVER w - MIN(event_at) OVER w)
+        AS session_length_sec
       , CASE
           WHEN event_name = 'session_start'
             AND event_params_ga_session_number = 1
@@ -190,9 +277,11 @@
 
     FROM joins
 
+    WINDOW w AS (PARTITION BY user_pseudo_id, event_params_ga_session_id)
+
   )
 
-  SELECT * FROM calculations
+  SELECT * FROM final
 
 
 {% endmacro %}

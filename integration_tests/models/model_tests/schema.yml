@@ -12,6 +12,7 @@ seeds:
     description: Google Analytics 4 event example data set
                  that covers all fields.
 
+
 sources:
   - name: fx
     quoting:

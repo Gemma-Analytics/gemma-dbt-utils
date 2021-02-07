@@ -26,9 +26,16 @@ vars:
   'gemma:fx:enabled': false  # overwrite this variable to enable the fx model
   'gemma:fx:base_currency': 'USD' # overwrite to get a different default value
 
-  'gemma:ga4:enabled': true
+  'gemma:ga4:enabled': false
   'gemma:ga4:source': "{{ source('bq', 'events') }}"
   'gemma:ga4:table': "raw_bq.events" # alternative if no source.yml is used
+  'gemma:ga4:properties':
+  # app_info:
+  # device:
+  # ecommerce:
+  # geo:
+    traffic_source:
+  # user_ltv:
   'gemma:ga4:arrays':
     event_params:
       ga_session_id: BIGINT
@@ -37,12 +44,4 @@ vars:
       session_engaged: BOOLEAN
     user_properties:
       user_id:
-    # items: to be added..
-
-
-models:
-  gemma_dbt_utils:
-    # Defaults for all models in package
-    +schema: gemma_dbt_utils
-    +tags: gemma_dbt_utils
-    +materialized: table
+  # items: should not be unnested in the base model, but in a additional model

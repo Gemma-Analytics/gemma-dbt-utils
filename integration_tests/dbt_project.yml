@@ -31,6 +31,13 @@ vars:
   'gemma:ga4:enabled': true
   'gemma:ga4:source': "{{ source('bq', 'events') }}"
   'gemma:ga4:table': "raw_bq.events"
+  'gemma:ga4:properties':
+    app_info:
+    device:
+    ecommerce:
+    geo:
+    traffic_source:
+    user_ltv:
   'gemma:ga4:arrays':
     event_params:
       ga_session_id: BIGINT
@@ -54,4 +61,33 @@ vars:
     user_properties:
       user_id:
       set_timestamp_micros: BIGINT
-    # items: to be added..
+    #items: should not be unnested in the base model, but in a additional model
+
+
+seeds:
+  dbt_utils_integration_tests:
+    +enabled: true
+    +quote_columns: true
+    model_tests:
+      gemma_ga4:
+        models_gemma_ga4_events:
+          +column_types:
+            event_date: 'TEXT'
+            event_timestamp: 'BIGINT'
+            event_name: 'TEXT'
+            event_params: 'JSONB'
+            event_bundle_sequence_id: 'BIGINT'
+            user_pseudo_id: 'TEXT'
+            user_properties: 'JSONB'
+            user_first_touch_timestamp: 'BIGINT'
+            user_ltv: 'JSONB'
+            device: 'JSONB'
+            geo: 'JSONB'
+            traffic_source: 'JSONB'
+            stream_id: 'TEXT'
+            platform: 'TEXT'
+            items: 'JSONB'
+            user_id: 'TEXT'
+            app_info: 'JSONB'
+            event_dimensions: 'JSONB'
+            ecommerce: 'JSONB'
