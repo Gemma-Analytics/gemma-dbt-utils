@@ -20,6 +20,9 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 vars:
   # Set variables to configure the Gemma dbt utils package
+  'gemma:dates:timezone': 'Europe/Berlin'
+  'gemma:dates:enabled': true
+  'gemma:dates:start_date': '2020-01-01'
   'gemma:fx:currencies':
     EUR: 'gemma:fx:eur'
     CHF: 'gemma:fx:chf'
@@ -27,3 +30,66 @@ vars:
   'gemma:fx:chf': "{{ source('fx', 'chf') }}"
   'gemma:fx:base_currency': EUR
   'gemma:fx:enabled': true
+
+  'gemma:ga4:enabled': true
+  'gemma:ga4:source': "{{ source('bq', 'events') }}"
+  'gemma:ga4:properties':
+    app_info:
+    device:
+    ecommerce:
+    geo:
+    traffic_source:
+    user_ltv:
+  'gemma:ga4:arrays':
+    event_params:
+      ga_session_id: BIGINT
+      ga_session_number: INT
+      engagement_time_msec: BIGINT
+      gclid:
+      campaign:
+      content:
+      medium:
+      source:
+      search_term:
+      term:
+      page_referrer:
+      page_path:
+      page_location:
+      page_title:
+      link_url:
+      outbound: BOOLEAN
+      session_engaged: BOOLEAN
+      engaged_session_event: BOOLEAN
+    user_properties:
+      user_id:
+      set_timestamp_micros: BIGINT
+    #items: should not be unnested in the base model, but in a additional model
+
+
+seeds:
+  dbt_utils_integration_tests:
+    +enabled: true
+    +quote_columns: true
+    model_tests:
+      gemma_ga4:
+        models_gemma_ga4_events:
+          +column_types:
+            event_date: 'TEXT'
+            event_timestamp: 'BIGINT'
+            event_name: 'TEXT'
+            event_params: 'JSONB'
+            event_bundle_sequence_id: 'BIGINT'
+            user_pseudo_id: 'TEXT'
+            user_properties: 'JSONB'
+            user_first_touch_timestamp: 'BIGINT'
+            user_ltv: 'JSONB'
+            device: 'JSONB'
+            geo: 'JSONB'
+            traffic_source: 'JSONB'
+            stream_id: 'TEXT'
+            platform: 'TEXT'
+            items: 'JSONB'
+            user_id: 'TEXT'
+            app_info: 'JSONB'
+            event_dimensions: 'JSONB'
+            ecommerce: 'JSONB'
