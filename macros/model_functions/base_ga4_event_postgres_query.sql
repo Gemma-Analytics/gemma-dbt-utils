@@ -1,7 +1,5 @@
 {% macro base_ga4_event_postgres_query() %}
 
-{{ config(enabled=var("gemma:ga4:enabled")) }}
-
   WITH events AS (
 
     SELECT * FROM {{ var("gemma:ga4:source") }}
@@ -30,9 +28,9 @@
       , items
       , event_params
       , user_properties
-      , event_dimensions
       , platform
   {# extract values from event properties #}
+{%- if var('gemma:ga4:properties') -%}
   {%- for property in var('gemma:ga4:properties') -%}
     {%- if property == 'app_info' %}
       , {{ property }}->>'id' AS {{ property}}_id
@@ -73,6 +71,9 @@
       , {{ property }}->>'unique_items' AS {{ property }}_unique_items
       , {{ property }}->>'transaction_id' AS {{ property }}_transaction_id
 
+    {%- elif property == 'event_dimensions' %}
+      , {{ property }}
+
     {%- elif property == 'geo' %}
       , {{ property }}->>'city' AS {{ property }}_city
       , {{ property }}->>'metro' AS {{ property }}_metro
@@ -91,13 +92,13 @@
       , {{ property }}->>'currency' AS {{ property }}_currency
 
     {%- endif -%}
-  {%- endfor %}
-
+  {%- endfor -%}
+{%- endif %}
     FROM events
 
   {# unnest arrays and put the elements later into a dictionary #}
+{%- if var('gemma:ga4:arrays') -%}
   {%- for array in var('gemma:ga4:arrays') %}
-
     {% if array == 'items' -%}
      {# CATCH ITEMS ARRAY, items array should be unnested in an own model #}
     {% else -%}
@@ -129,9 +130,10 @@
 
     GROUP BY 1
 
-  {%- endif -%}
+    {%- endif -%}
 
-  {%- endfor %}
+  {%- endfor -%}
+{%- endif %}
 
   ), joins AS (
 
@@ -148,7 +150,8 @@
       , transforms.event_bundle_sequence_id
       , transforms.platform
   {# create columns based on the chosen properties #}
-  {% for property in var('gemma:ga4:properties') -%}
+{%- if var('gemma:ga4:properties') -%}
+  {%- for property in var('gemma:ga4:properties') -%}
     {%- if property == 'app_info' %}
       , transforms.{{ property }}_id
       , transforms.{{ property }}_version
@@ -185,6 +188,9 @@
       , transforms.{{ property }}_unique_items
       , transforms.{{ property }}_transaction_id
 
+    {%- elif property == 'event_dimensions' %}
+      , transforms.{{ property }}
+
     {%- elif property == 'geo' %}
       , transforms.{{ property }}_city
       , transforms.{{ property }}_metro
@@ -203,19 +209,23 @@
       , transforms.{{ property }}_currency
 
     {%- endif -%}
-  {%- endfor %}
+  {%- endfor -%}
+{%- endif %}
       , transforms.items
   {# create unnested array columns event_params, user properties but not items
      items should be unnested in an additional model later #}
+{%- if var('gemma:ga4:arrays') -%}
   {%- for array_name in var('gemma:ga4:arrays') %}
     {%- if array_name == 'items' -%}
      {# CATCH ITEMS ARRAY, items array should be unnested in an own model #}
     {%- else %}
       , {{ array_name }}_cte.{{ array_name }}
     {% endif -%}
-  {% endfor -%}
+  {%- endfor -%}
+{% endif -%}
 
   {# Interate over the chosen event parameters #}
+{%- if var('gemma:ga4:arrays').0 -%}
   {%- for array_name, field in var('gemma:ga4:arrays').items() %}
     {% if array_name == 'items' -%}
      {# CATCH ITEMS ARRAY, items array should be unnested in an own model #}
@@ -228,20 +238,26 @@
 
      {%- endfor %}
      {%- endif %}
-  {%- endfor %}
+  {%- endfor -%}
+{%- endif %}
 
     FROM transforms
+
+  {%- if var('gemma:ga4:arrays') -%}
   {%- for array in var('gemma:ga4:arrays') %}
 
       LEFT JOIN {{ array }}_cte
         ON transforms.event_id = {{ array }}_cte.event_id
 
-  {% endfor -%}
+  {%- endfor -%}
+  {%- endif %}
 
   ), final AS (
 
     SELECT
         *
+
+    {%- if var('gemma:ga4:properties').traffic_source %}
       , CASE
           WHEN traffic_source_source = '(direct)'
             AND (traffic_source_medium = '(not set)'
@@ -266,19 +282,27 @@
             THEN 'Display'
           ELSE '(Other)'
         END AS default_channel_grouping
+    {%- endif -%}
+
+    {%- if var('gemma:ga4:arrays').ga_session_id %}
       , EXTRACT(EPOCH FROM MAX(event_at) OVER w - MIN(event_at) OVER w)
         AS session_length_sec
+    {% endif -%}
+
+    {%- if var('gemma:ga4:arrays').ga_session_number %}
       , CASE
           WHEN event_name = 'session_start'
             AND event_params_ga_session_number = 1
             THEN 1
           ELSE 0
         END AS is_new_user
+    {%- endif %}
 
     FROM joins
 
+  {%- if var('gemma:ga4:arrays').ga_session_id %}
     WINDOW w AS (PARTITION BY user_pseudo_id, event_params_ga_session_id)
-
+  {%- endif %}
   )
 
   SELECT * FROM final

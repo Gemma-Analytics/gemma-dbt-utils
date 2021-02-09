@@ -1,6 +1,8 @@
+{{ config(enabled=var("gemma:dates:enabled")) }}
+
 WITH dates AS(
 
-  SELECT
+  SELECT  
     GENERATE_SERIES(
       '{{ var('gemma:dates:start_date') }}',
       DATE(TIMEZONE('{{ var('gemma:dates:timezone') }}', CURRENT_TIMESTAMP))

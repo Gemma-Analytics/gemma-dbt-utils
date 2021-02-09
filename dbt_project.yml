@@ -18,6 +18,7 @@ source-paths: ["models"]
 
 vars:
   'gemma:dates:timezone': 'Europe/Berlin'
+  'gemma:dates:enabled': false
   'gemma:dates:start_date': '2020-01-01'
   # Variables related to the fx model
   'gemma:fx:currencies':
@@ -29,23 +30,22 @@ vars:
 
   'gemma:ga4:enabled': false
   'gemma:ga4:source': "{{ source('bq', 'events') }}"
-  'gemma:ga4:table': "raw_bq.events" # alternative if no source.yml is used
   'gemma:ga4:properties':
-  # app_info:
-  # device:
-  # ecommerce:
-  # geo:
-    traffic_source:
-  # user_ltv:
+    # app_info:
+    # device:
+    # ecommerce:
+    # event_dimensions
+    # geo:
+    # traffic_source:
+    # user_ltv:
   'gemma:ga4:arrays':
-    event_params:
-      ga_session_id: BIGINT
-      ga_session_number: INT
-      engagement_time_msec: BIGINT
-      session_engaged: BOOLEAN
-    user_properties:
-      user_id:
-  # items: should not be unnested in the base model, but in a additional model
+    #event_params:
+      #ga_session_id: BIGINT
+      #ga_session_number: INT
+      #engagement_time_msec: BIGINT
+      #session_engaged: BOOLEAN
+    #user_properties:
+      #user_id:
 
 models:
   gemma_dbt_utils:
