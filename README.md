@@ -3,6 +3,18 @@ Gemma Analytics utilities for dbt
 
 This packages is expected to be used in addition to [dbt-utils](https://github.com/fishtown-analytics/dbt-utils) and expands upon it rather than replacing it.
 
+**Table of Contents**
+
+- [Installation](#installation)
+- [Contributing](#contributing)
+  - [How to get started](#how-to-get-started)
+  - [Requirements - Schema Tests](#requirements---schema-tests)
+  - [Requirements - Models](#requirements---models)
+- [Models](#models)
+  - [FX aka Exchange Rates](#fx-aka-exchange-rates)
+- [Schema Tests](#schema-tests)
+  - [numeric_constraints](#numeric_constraints)
+
 ## Installation
 
 Install this package in your project by adding it to your `packages.yml`:
@@ -22,7 +34,7 @@ Make sure all contributions have the following:
 - Tests for correct behavior in the `integration_tests`
 - Appropriate documentation in this README and, for models, in the appropriate schema.yml as well
 
-### Contributing - How to get started
+### How to get started
 
 Creating a dbt package can be unintuitive at first. This repository contains two dbt projects: the actual package and another, independent dbt project called `integration_tests` in the aptly identically named subfolder. The `integration_tests` project exists both for running the CICD pipeline and to help develop the package. When you develop the package locally, you will not run the package; instead, you should run the `integration_tests` project which uses the package as package. Only then can you be sure that the package actually works as expected.
 
@@ -35,12 +47,12 @@ Follow these steps to get started with developing the package:
 1. Windows: open a separate command prompt **with administrator priviliges**, cd to the `integration_tests` folder, activate the virtual environment, and run `dbt deps` - this is required to set the symlink* (you can close this command prompt afterwards, all other commands are in a normal command prompt)
 1. Run `dbt seed && dbt run && dbt test` to check that it all works
 1. Develop
-  - Make changes to the package
-  - Run `dbt seed && dbt run && dbt test`
-  - See if you get the results you expect
-  - Repeat
+    - Make changes to the package
+    - Run `dbt seed && dbt run && dbt test`
+    - See if you get the results you expect
+    - Repeat
 1. When ready, open a PR with your changes into `staging`
-  - Make sure you have documented your models and added appropriate tests - take a look at the existing models and tests to get an idea how to proceed
+    - Make sure you have documented your models and added appropriate tests - take a look at the existing models and tests to get an idea how to proceed
 
 *The package is installed via symlink -> the `integration_tests` project creates a symbolic link to the higher-level package and that way auto-updates whenever you make any changes to the package
 
@@ -95,7 +107,10 @@ vars:
 
 ## Schema Tests
 
-### numeric_constraints ([source](macros/schema_tests/numeric_constraints.sql))
+### numeric_constraints
+
+([source](macros/schema_tests/numeric_constraints.sql))
+
 This schema test asserts that a column of numerical value is within specified bounds.
 
 Usage:
