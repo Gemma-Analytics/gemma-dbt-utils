@@ -23,3 +23,5 @@ models:
         description: Multiply an amount in the source currency aka fx_currency with the fx_rate to get an equivalent amount in the base currency.
         tests:
           - not_null
+          - numeric_constraints:
+              gt: 0  # Must be positive real number

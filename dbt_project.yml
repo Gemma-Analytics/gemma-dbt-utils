@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'gemma_dbt_utils'
-version: '0.2.9'
+version: '0.3.0'
 
 require-dbt-version: '>=0.17.0'
 
@@ -24,6 +24,8 @@ vars:
   # 'gemma:fx:eur': "{{ source('fx', 'eur') }}"  # must use this approach to use source macro
   'gemma:fx:enabled': false  # overwrite this variable to enable the fx model
   'gemma:fx:base_currency': 'USD' # overwrite to get a different default value
+  'gemma:fx:column_date': 'formatted_date::DATE'
+  'gemma:fx:column_rate': 'adjclose'
 
 models:
   gemma_dbt_utils:
