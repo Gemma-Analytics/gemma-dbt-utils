@@ -20,6 +20,11 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 vars:
   # Set variables to configure the Gemma dbt utils package
+  'gemma:dates:timezone': 'Europe/Berlin'
+  'gemma:dates:enabled': true
+  'gemma:dates:start_date': '2020-01-01'
+  'gemma:dates:end_date': '30 day'
+
   'gemma:fx:currencies':
     EUR: 'gemma:fx:eur'
     CHF: 'gemma:fx:chf'

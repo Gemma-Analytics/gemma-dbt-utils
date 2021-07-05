@@ -23,3 +23,15 @@ models:
         description: Multiply an amount in the source currency aka fx_currency with the fx_rate to get an equivalent amount in the base currency.
         tests:
           - not_null
+
+  - name: gemma_dates
+    description: "A calendar table: date series with one row per day."
+    columns:
+      - name: date_id
+        tests:
+          - unique
+          - not_null
+      - name: date
+        tests:
+          - unique
+          - not_null

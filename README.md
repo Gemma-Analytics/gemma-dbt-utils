@@ -32,6 +32,26 @@ vars:
   'gemma:fx:base_currency': EUR
   'gemma:fx:enabled': true
 ```
+### (Dim) Dates
+
+This model will create the table `gemma_dates` in the schema `YOUR_SCHEMA_gemma_dbt_utils`. Starting from a defined date it will create a date series with different date columns until a specified number of days, e.g. 30 days after the current date. It works for postgres and bigquery - specified through the target type in the `profiles.yml`
+The configurations are:
+
+| Variables | Default | Purpose |
+| --- | --- | --- |
+| gemma:dates:timezone | "Europe/Berlin" | Required String. Sets the timezone for this model |
+| gemma:dates:enabled | false | Required Boolean. Set to true to activate the model|
+| gemma:dates:start_date | '2020-01-01' | Required String. Sets the `start_date` for the date series |
+| gemma:dates:end_date | 30 day | Required String. Sets the `end_date` for the date series |
+
+Example `dbt_project.yml`:
+```yaml
+vars:
+  'gemma:dates:timezone': 'Europe/Berlin'
+  'gemma:dates:enabled': true
+  'gemma:dates:start_date': '2000-01-01'
+  'gemma:dates:end_date': 30 day # 30 days after the current date
+```
 
 ## Schema Tests
 
