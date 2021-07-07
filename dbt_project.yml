@@ -18,10 +18,12 @@ source-paths: ["models"]
 
 vars:
   # Variables related to the dim_dates model
-  'gemma:dates:timezone': 'Europe/Berlin'
-  'gemma:dates:enabled': false
-  'gemma:dates:start_date': '2020-01-01'
+  'gemma:dates:timezone': 'Europe/Berlin' # overwrite to get a different default value
+  'gemma:dates:enabled': false # overwrite this variable to enable the date model
+  'gemma:dates:start_date': '2020-01-01' # overwrite to get a different default value
   'gemma:dates:end_date': '30 day' # 30 days after the current date
+  'gemma:dates:table': 'gemma_dates' # overwrite to get a different default value
+  'gemma:dates:schema': 'gemma_dbt_utils' # overwrite to get a different default value
 
   # Variables related to the fx model
   'gemma:fx:currencies':
