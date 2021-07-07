@@ -32,6 +32,30 @@ vars:
   'gemma:fx:base_currency': EUR
   'gemma:fx:enabled': true
 ```
+### (Dim) Dates
+
+This model will create the table `gemma_dates` in the schema `YOUR_SCHEMA_gemma_dbt_utils`. Starting from a defined date it will create a date series with different date columns until a specified number of days, e.g. 30 days after the current date. It works for postgres and bigquery - specified through the target type in the `profiles.yml`
+The configurations are:
+
+| Variables | Default | Purpose |
+| --- | --- | --- |
+| gemma:dates:timezone | 'Europe/Berlin' | Optional String. Sets the timezone for this model. By defaul, it's set to 'Europe/Berlin' |
+| gemma:dates:enabled | false | Required Boolean. Set to true to activate the model|
+| gemma:dates:start_date | '2020-01-01' | Optional String. Sets the `start_date` for the date series. By defaul, it's set to '2020-01-01'  |
+| gemma:dates:end_date | '30 day' | Optional String. It is an interval relative to current_date, which sets the `end_date` for the date series. By defaul, it's set to '30 day' |
+| gemma:dates:table | 'gemma_dates' | Optional String. Sets an alias for the model. By default, it's set to 'gemma_dates' |
+| gemma:dates:schema | 'gemma_dbt_utils' | Optional String. Sets the a custom schema for the model. By default, it's set to 'gemma_dbt_utils' |
+
+Example `dbt_project.yml`:
+```yaml
+vars:
+  'gemma:dates:timezone': 'Europe/Berlin' # overwrite to get a different default value
+  'gemma:dates:enabled': false # overwrite this variable to enable the date model
+  'gemma:dates:start_date': '2020-01-01' # overwrite to get a different default value
+  'gemma:dates:end_date': '30 day' # 30 days after the current date
+  'gemma:dates:table': 'gemma_dates' # overwrite to get a different default value
+  'gemma:dates:schema': 'gemma_dbt_utils' # overwrite to get a different default value
+```
 
 ## Schema Tests
 

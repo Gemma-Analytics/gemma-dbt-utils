@@ -7,6 +7,8 @@ seeds:
     description: Sample raw FX rates from Yahoo Finance (USDEUR)
   - name: models_gemma_fx_result_eur_chf
     description: Correct EURCHF fx rates based on USDCHF and USDEUR. Test gemma_fx with this data.
+  - name: models_gemma_dates_sample_results
+    description: Correct sample year_day_num and quarter_day_num. Test gemma_date with this data.
 
 sources:
   - name: fx
