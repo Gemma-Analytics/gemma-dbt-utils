@@ -42,7 +42,7 @@ The configurations are:
 | gemma:dates:timezone | 'Europe/Berlin' | Optional String. Sets the timezone for this model. By defaul, it's set to 'Europe/Berlin' |
 | gemma:dates:enabled | false | Required Boolean. Set to true to activate the model|
 | gemma:dates:start_date | '2020-01-01' | Optional String. Sets the `start_date` for the date series. By defaul, it's set to '2020-01-01'  |
-| gemma:dates:end_date | '30 day' | Optional String. Sets the `end_date` for the date series. By defaul, it's set to '30 day' |
+| gemma:dates:end_date | '30 day' | Optional String. It is an interval relative to current_date, which sets the `end_date` for the date series. By defaul, it's set to '30 day' |
 | gemma:dates:table | 'gemma_dates' | Optional String. Sets an alias for the model. By default, it's set to 'gemma_dates' |
 | gemma:dates:schema | 'gemma_dbt_utils' | Optional String. Sets the a custom schema for the model. By default, it's set to 'gemma_dbt_utils' |
 
