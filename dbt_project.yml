@@ -1,9 +1,11 @@
 config-version: 2
 
 name: 'gemma_dbt_utils'
-version: '0.2.10'
+version: '0.3.0'
 
-require-dbt-version: '>=0.17.0'
+# As long as we required the dbt labs' dbt utils, we ought to be in line
+# with their dbt version requirements
+require-dbt-version: ['>=0.20.0', '<0.22.0']
 
 profile: 'gemma_dbt_utils_profile'
 
