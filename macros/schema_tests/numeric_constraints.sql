@@ -30,7 +30,7 @@ validation_errors as (
 
 )
 
-select count(*)
+select * -- from dbt 0.20.0 on, tests fail if any row is returned
 from validation_errors
 
 {% endmacro %}
