@@ -34,7 +34,9 @@ vars:
 ```
 ### (Dim) Dates
 
-This model will create the table `gemma_dates` in the schema `YOUR_SCHEMA_gemma_dbt_utils`. Starting from a defined date it will create a date series with different date columns until a specified number of days, e.g. 30 days after the current date. It works for postgres and bigquery - specified through the target type in the `profiles.yml`
+This model will create the table `gemma_dates` in the schema `YOUR_SCHEMA_gemma_dbt_utils`. Starting from a defined date it will create a date series with different date columns until a specified number of days, e.g. 30 days after the current date. It works for postgres and bigquery - specified through the target type in the `profiles.yml`.
+To reference this model in other models, use always the default name `gemma_dates` even if an alias name is provided for the `gemma:dates:table` variable.
+
 The configurations are:
 
 | Variables | Default | Purpose |
