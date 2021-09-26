@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'gemma_dbt_utils'
-version: '0.3.0'
+version: '0.3.1'
 
 # As long as we required the dbt labs' dbt utils, we ought to be in line
 # with their dbt version requirements
