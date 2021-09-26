@@ -3,6 +3,45 @@ Gemma Analytics utilities for dbt
 
 This packages is expected to be used in addition to [dbt-utils](https://github.com/fishtown-analytics/dbt-utils) and expands upon it rather than replacing it.
 
+## Macros
+
+The following macros are available in this package:
+- select_star_except
+
+### select_star_except
+
+Use this model in a PostgreSQL DWH to emulate the `SELECT * EXCEPT(table_name [, table_names])` behavior. Only works when referencing another table, does not work within CTEs.
+
+##### Arguments
+
+| Name | Example | Meaning |
+| --- | --- | --- |
+| table_relation | ref("a_model") | a dbt relation object (source or ref macro)|
+| exceptions_list | ["column_name_a", "column_name_b"] | an iterable that contains the names of columns to be excepted |
+| return_query | TRUE | Boolean: returns a full SELECT query if TRUE, only the comma-separated list of columns otherwise |
+
+##### Example usages
+
+```sql
+
+-- Variant with return_query = False
+SELECT {{ gemma_dbt_utils.select_star_except(
+      ref("data_test_numeric_constraints")
+    , ["type", "vat_pct"]
+    , False
+  )}}
+FROM ref("data_test_numeric_constraints")
+
+-- Is equivalent to this:
+
+{{ gemma_dbt_utils.select_star_except(
+    ref("data_test_numeric_constraints")
+  , ["type", "vat_pct"]
+  , True
+) }}
+
+```
+
 ## Models
 
 These models are deactivated by default, but can be activatd and configured using variables in your `dbt_project.yml` file.
