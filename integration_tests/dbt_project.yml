@@ -5,12 +5,12 @@ version: '1.0'
 
 profile: 'integration_tests'
 
-require-dbt-version: ">=0.17.0"
+require-dbt-version: ">=1.0.0"
 
-source-paths: ["models"]
+model-paths: ["models"]
 analysis-paths: ["analysis"]
 test-paths: ["tests"]
-data-paths: ["data"]
+seed-paths: ["data"]
 macro-paths: ["macros"]
 
 target-path: "target"  # directory which will store compiled SQL files
@@ -26,7 +26,7 @@ vars:
   'gemma:dates:end_date': '30 day'
   'gemma:dates:table': 'gemma_dates'
   'gemma:dates:schema': 'gemma_dbt_utils'
-  
+
   'gemma:fx:currencies':
     EUR: 'gemma:fx:eur'
     CHF: 'gemma:fx:chf'

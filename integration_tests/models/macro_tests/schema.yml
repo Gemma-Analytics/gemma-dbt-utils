@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+    # for testing the (postgres) indexing macro
+  - name: information_schema
+    schema: information_schema
+    tables:
+      - name: columns
