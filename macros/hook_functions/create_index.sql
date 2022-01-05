@@ -23,7 +23,7 @@
   #}
   {% if target.type == 'postgres' | as_bool() %}
     {%- set hashing_query -%}
-    {# Hash index column to avoid running into postgres 63 byte identifier limit #}
+      {# Hash index column to avoid running into postgres 63 byte identifier limit #}
       SELECT md5('{{ table_model}}_{{ column }}')
     {%- endset -%}
 
