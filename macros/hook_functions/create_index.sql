@@ -30,7 +30,7 @@
     {%- if execute -%}
       {%- set index_name = run_query(hashing_query).columns[0].values()[0] -%}
     {%- else -%}
-    {# required to avoid compilation failure #}
+      {# required to avoid compilation failure #}
       {%- set index_name = "-" -%}
     {%- endif -%}
 
