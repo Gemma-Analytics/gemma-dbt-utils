@@ -6,7 +6,7 @@ if [[ ! -f $VENV ]]; then
     . $VENV
 
     pip install --upgrade pip setuptools
-    pip install dbt
+    pip install dbt-postgres
 fi
 
 . $VENV
