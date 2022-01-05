@@ -1,11 +1,10 @@
 config-version: 2
 
 name: 'gemma_dbt_utils'
-version: '0.3.1'
+version: '0.4.0'
 
-# As long as we required the dbt labs' dbt utils, we ought to be in line
-# with their dbt version requirements
-require-dbt-version: ['>=0.20.0', '<0.22.0']
+# why different req than integration test version? can be aligned?
+require-dbt-version: ">=1.0.0"
 
 profile: 'gemma_dbt_utils_profile'
 
@@ -14,9 +13,8 @@ clean-targets:
   - "target"
   - "dbt_modules"
 log-path: "logs"
-
 macro-paths: ["macros"]
-source-paths: ["models"]
+model-paths: ["models"]
 
 vars:
   # Variables related to the dim_dates model
