@@ -3,7 +3,6 @@ config-version: 2
 name: 'gemma_dbt_utils'
 version: '0.4.0'
 
-# why different req than integration test version? can be aligned?
 require-dbt-version: ">=1.0.0"
 
 profile: 'gemma_dbt_utils_profile'
