@@ -22,8 +22,3 @@ sources:
         identifier: models_gemma_fx_raw_data_usd_eur
       - name: chf
         identifier: models_gemma_fx_raw_data_usd_chf
-    # for testing the (postgres) indexing macro
-  - name: information_schema
-    schema: information_schema
-    tables:
-      - name: columns
