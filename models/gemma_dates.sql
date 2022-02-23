@@ -139,7 +139,7 @@
 
   {% do run_query(define_timeframe) %}
 
-WITH dates AS (
+  WITH dates AS (
 
     SELECT
       DATEADD(
