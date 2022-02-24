@@ -214,7 +214,7 @@
 
   SELECT * FROM final
 
-{% elif target.type not in ('bigquery','postgres','snowflake') | as_bool() %}
+{% else %}
 
   {% do exceptions.raise_compiler_error("This DB is not supported in dim_dates model") %}
 
