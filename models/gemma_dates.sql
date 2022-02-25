@@ -1,5 +1,7 @@
-{{ config(alias=var("gemma:dates:table"),
-        schema=var("gemma:dates:schema"), enabled=var("gemma:dates:enabled")) }}
+{{ config(alias = var("gemma:dates:table"),
+          schema = var("gemma:dates:schema"),
+          enabled = var("gemma:dates:enabled")
+) }}
 
 {% if target.type == 'postgres' | as_bool() %}
 
@@ -127,7 +129,92 @@
 
   SELECT * FROM final
 
-{% elif target.type not in ('bigquery','postgres') | as_bool() %}
+{% elif target.type == 'snowflake' | as_bool() %}
+
+  {% set define_timeframe %}
+    SET timeframe = (SELECT CURRENT_DATE - '{{ var('gemma:dates:start_date') }}'::DATE
+                    + (DATEDIFF('day', CURRENT_DATE, CURRENT_DATE + INTERVAL '{{ var('gemma:dates:end_date') }}'))
+                    + 1)
+  {% endset %}
+
+  {% do run_query(define_timeframe) %}
+
+  WITH dates AS (
+
+    SELECT
+      DATEADD(
+        DAY,
+        '-' || ROW_NUMBER() OVER (ORDER BY NULL) + 1,
+         CURRENT_DATE + INTERVAL '{{ var('gemma:dates:end_date') }}'
+      ) AS date
+    FROM TABLE (generator(rowcount => $timeframe))
+
+  ), final AS (
+
+    SELECT
+        TO_CHAR(date, 'YYYYMMDD') AS date_id
+      , DATE(date) AS date
+      , EXTRACT(DOY FROM date) AS year_day_num
+      , date - DATE_TRUNC('quarter', date) + 1
+        AS quarter_day_num
+      , EXTRACT(DAY FROM date) AS month_day_num
+      , EXTRACT(MONTH FROM date) AS month_num
+      , TO_CHAR(date,'MMMM') AS month_name
+      , TO_CHAR(date, 'Mon') AS month_abbreviated
+      , DAY(DATE_TRUNC('month', date) + INTERVAL '1 month' - interval ' 1 day')
+        AS month_days
+      , TO_CHAR(date, 'YYYY-MM') AS year_month
+      , EXTRACT(QUARTER FROM date) AS quarter_num
+      , DAY(DATE_TRUNC('quarter', date) + INTERVAL '1 month' - interval ' 1 day')
+        + DAY(DATE_TRUNC('quarter', date) + INTERVAL '2 month' - interval ' 1 day')
+        + DAY(DATE_TRUNC('quarter', date) + INTERVAL '3 month' - interval ' 1 day')
+        AS quarter_days
+      , EXTRACT(YEAR FROM date) AS year
+      , YEAR(date) AS iso_year
+      , EXTRACT(YEAR FROM date - INTERVAL '1 year') AS previous_year
+      , EXTRACT(QUARTER FROM date - INTERVAL '3 month') AS previous_quarter_num
+      , EXTRACT(MONTH FROM date - INTERVAL '1 month') AS previous_month_num
+      , EXTRACT(WEEK FROM date) AS year_week_num
+      , EXTRACT(YEAR FROM date) || TO_CHAR(date, '-CW') || WEEKOFYEAR(date) AS year_week_name
+      , DAYOFWEEKISO(date) AS weekday_num
+      , DECODE(EXTRACT ('dayofweek_iso', date),
+        1, 'Monday',
+        2, 'Tuesday',
+        3, 'Wednesday',
+        4, 'Thursday',
+        5, 'Friday',
+        6, 'Saturday',
+        7, 'Sunday')  AS weekday_name
+      , DAYNAME(date) AS weekday_abbreviated
+      , DAYOFWEEKISO(date) NOT IN (6,7) AS is_weekday
+      , DATE(DATE_TRUNC('year', date)) AS year_first_day
+      , DATE(DATE_TRUNC('year', date) + INTERVAL '1 year' - INTERVAL '1 day')
+        AS year_last_day
+      , DATE(DATE_TRUNC('quarter', date)) AS quarter_first_day
+      , DATE(DATE_TRUNC('quarter', date) + INTERVAL '3 month' - INTERVAL '1 day')
+        AS quarter_last_day
+      , DATE(DATE_TRUNC('month', date)) AS month_first_day
+      , DATE(DATE_TRUNC('month', date) + INTERVAL '1 month' - INTERVAL '1 day')
+        AS month_last_day
+      , DATE(DATE_TRUNC('week', date)) AS week_first_day
+      , DATE(DATE_TRUNC('week', date) + INTERVAL '1 week' - INTERVAL '1 day')
+        AS week_last_day
+      , DATE(DATE_TRUNC('month', date - INTERVAL '1 month'))
+        AS previous_month_first_day
+      , DATE(DATE_TRUNC('month', date) - INTERVAL '1 day')
+        AS previous_month_last_day
+      , DATE(DATE_TRUNC('month', date + INTERVAL '1 month'))
+        AS next_month_first_day
+      , DATE(DATE_TRUNC('month', date) + INTERVAL '2 month' - INTERVAL '1 day')
+        AS next_month_last_day
+
+    FROM dates
+
+  )
+
+  SELECT * FROM final
+
+{% else %}
 
   {% do exceptions.raise_compiler_error("This DB is not supported in dim_dates model") %}
 
