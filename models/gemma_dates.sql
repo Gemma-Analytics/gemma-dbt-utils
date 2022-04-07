@@ -131,13 +131,25 @@
 
 {% elif target.type == 'snowflake' | as_bool() %}
 
-  {% set define_timeframe %}
-    SET timeframe = (SELECT CURRENT_DATE - '{{ var('gemma:dates:start_date') }}'::DATE
-                    + (DATEDIFF('day', CURRENT_DATE, CURRENT_DATE + INTERVAL '{{ var('gemma:dates:end_date') }}'))
-                    + 1)
+  {% set timeframe_query %}
+  SELECT
+    CURRENT_DATE
+    - '{{ var('gemma:dates:start_date') }}'::DATE
+    + (DATEDIFF('day', CURRENT_DATE, CURRENT_DATE + INTERVAL '{{ var('gemma:dates:end_date') }}'))
+    + 1
   {% endset %}
 
-  {% do run_query(define_timeframe) %}
+  {% set timeframe_result = run_query(timeframe_query) %}
+
+  {% if execute %}
+
+    {% set timeframe = timeframe_result.columns[0].values()[0] %}
+
+  {% else %}
+
+    {% set timeframe = 1 %}
+
+  {% endif %}
 
   WITH dates AS (
 
