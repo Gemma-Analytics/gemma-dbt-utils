@@ -159,7 +159,7 @@
         '-' || ROW_NUMBER() OVER (ORDER BY NULL) + 1,
          CURRENT_DATE + INTERVAL '{{ var('gemma:dates:end_date') }}'
       ) AS date
-    FROM TABLE (generator(rowcount => $timeframe))
+    FROM TABLE (generator(rowcount => {{ timeframe }} ))
 
   ), final AS (
 
