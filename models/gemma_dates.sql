@@ -219,7 +219,7 @@
         AS next_month_first_day
       , DATE(DATE_TRUNC('month', date) + INTERVAL '2 month' - INTERVAL '1 day')
         AS next_month_last_day
-      , CONCAT(year, '-Q', quarter_num) AS year_quarter
+      , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
 
     FROM dates
 
