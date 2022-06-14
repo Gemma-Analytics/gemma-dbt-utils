@@ -123,7 +123,7 @@
       , DATE_TRUNC(DATE_ADD(date, INTERVAL 1 MONTH), MONTH)
         AS next_month_first_day
       , LAST_DAY(DATE_ADD(date, INTERVAL 1 MONTH), MONTH) AS next_month_last_day
-      , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
+      , EXTRACT(YEAR FROM date) || '-Q' || FORMAT_DATE('%Q', date) AS year_quarter
 
   FROM dates
 
