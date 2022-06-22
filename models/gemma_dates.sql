@@ -66,6 +66,12 @@
       , DATE(DATE_TRUNC('month', date) + INTERVAL '2 month - 1 day')
         AS next_month_last_day
       , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
+      , DENSE_RANK() OVER
+        (ORDER BY
+          EXTRACT(ISOYEAR FROM date) ||
+          TO_CHAR(date, '"-CW"IW') ASC
+        )
+        AS week_id
 
     FROM dates
 
@@ -124,6 +130,12 @@
         AS next_month_first_day
       , LAST_DAY(DATE_ADD(date, INTERVAL 1 MONTH), MONTH) AS next_month_last_day
       , EXTRACT(YEAR FROM date) || '-Q' || FORMAT_DATE('%Q', date) AS year_quarter
+      , DENSE_RANK() OVER
+        (ORDER BY
+          CAST(EXTRACT(ISOYEAR FROM date) AS STRING) ||
+          CAST(EXTRACT(WEEK FROM date) AS STRING) ASC
+        )
+        AS week_id
 
   FROM dates
 
@@ -222,6 +234,12 @@
       , DATE(DATE_TRUNC('month', date) + INTERVAL '2 month' - INTERVAL '1 day')
         AS next_month_last_day
       , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
+      , DENSE_RANK() OVER
+        (ORDER BY
+          EXTRACT(ISOYEAR FROM date)::TEXT ||
+          EXTRACT(WEEK FROM date)::TEXT ASC
+        )
+          AS week_id
 
     FROM dates
 
