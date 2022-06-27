@@ -130,8 +130,7 @@
       , EXTRACT(YEAR FROM date) || '-Q' || FORMAT_DATE('%Q', date) AS year_quarter
       , DENSE_RANK() OVER
         (ORDER BY
-          EXTRACT(ISOYEAR FROM DATE) ASC,
-          EXTRACT(WEEK FROM DATE) ASC
+          EXTRACT(ISOYEAR FROM DATE) ASC, EXTRACT(WEEK FROM DATE) ASC
         )
         AS week_id
 
@@ -234,8 +233,7 @@
       , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
       , DENSE_RANK() OVER
         (ORDER BY
-          EXTRACT(ISOYEAR FROM date) ASC,
-          EXTRACT(WEEK FROM date) ASC
+          EXTRACT(ISOYEAR FROM date) ASC, EXTRACT(WEEK FROM date) ASC
         )
         AS week_id
 
