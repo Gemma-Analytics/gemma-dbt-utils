@@ -128,9 +128,8 @@
         AS next_month_first_day
       , LAST_DAY(DATE_ADD(date, INTERVAL 1 MONTH), MONTH) AS next_month_last_day
       , EXTRACT(YEAR FROM date) || '-Q' || FORMAT_DATE('%Q', date) AS year_quarter
-      , DENSE_RANK() OVER
-        (ORDER BY
-          EXTRACT(ISOYEAR FROM DATE) ASC, EXTRACT(WEEK FROM DATE) ASC
+      , DENSE_RANK() OVER (
+          ORDER BY EXTRACT(ISOYEAR FROM DATE) ASC, EXTRACT(WEEK FROM DATE) ASC
         )
         AS week_id
 
@@ -231,9 +230,8 @@
       , DATE(DATE_TRUNC('month', date) + INTERVAL '2 month' - INTERVAL '1 day')
         AS next_month_last_day
       , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
-      , DENSE_RANK() OVER
-        (ORDER BY
-          EXTRACT(ISOYEAR FROM date) ASC, EXTRACT(WEEK FROM date) ASC
+      , DENSE_RANK() OVER (
+          ORDER BY EXTRACT(ISOYEAR FROM date) ASC, EXTRACT(WEEK FROM date) ASC
         )
         AS week_id
 
