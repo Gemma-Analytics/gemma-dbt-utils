@@ -109,7 +109,7 @@ WITH rates AS (
       TO_DATE (formatted_date) AS date
     , currency
     , adjclose AS fx_rate_usd
-    , COALESCE( -- the GENERATE_SERIES below throws out the very last day otherwise!
+    , COALESCE(
           LEAD(formatted_date::DATE) OVER (PARTITION BY currency ORDER BY date ASC)
           , DATEADD(day, 1, CURRENT_DATE())) AS next_date
     , ROW_NUMBER() OVER (PARTITION BY currency ORDER BY date ASC) AS temp_partition
