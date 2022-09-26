@@ -132,15 +132,13 @@ WITH rates AS (
 
 ), add_usd AS (
 
-  WITH minmax AS (SELECT date FROM add_missing_dates)
-
   SELECT * FROM add_missing_dates
   UNION ALL
   SELECT
       date
     , 'USD'
     , 1
-  FROM minmax AS mm
+  FROM all_dates AS mm
 
 ), base_currency AS (
 
