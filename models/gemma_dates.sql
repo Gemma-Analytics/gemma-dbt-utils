@@ -231,7 +231,7 @@
         AS next_month_last_day
       , EXTRACT(YEAR FROM date) || '-Q' || EXTRACT(QUARTER FROM date) AS year_quarter
       , DENSE_RANK() OVER (
-          ORDER BY EXTRACT(ISOYEAR FROM date) ASC, EXTRACT(WEEK FROM date) ASC
+          ORDER BY EXTRACT(YEAROFWEEKISO FROM date) ASC, EXTRACT(WEEK FROM date) ASC
         )
         AS week_id
 
