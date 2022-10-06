@@ -83,83 +83,85 @@ ORDER BY date DESC, fx_currency ASC
 
 {% elif target.type == 'snowflake' | as_bool() %}
 
-WITH rates AS (
+  WITH rates AS (
 
-  {% for currency, source_table in var('gemma:fx:currencies').items() %}
+    {% for currency, source_table in var('gemma:fx:currencies').items() %}
+
+      SELECT
+          "formatted_date" AS formatted_date
+        , '{{ currency|upper() }}' AS currency
+        , "adjclose" AS adjclose
+      FROM {{ var(source_table, source_table) }}
+      {# Checks if there is a variable called source_table. If there is not, source_table
+      may already be the name of the table. #}
+
+      {% if not loop.last %}
+
+        UNION ALL
+
+      {% endif %}
+
+    {% endfor %}
+
+  ), remove_nulls AS (
 
     SELECT
-        "formatted_date" AS formatted_date
-      , '{{ currency|upper() }}' AS currency
-      , "adjclose" AS adjclose
-    FROM {{ var(source_table, source_table) }}
-    {# Checks if there is a variable called source_table. If there is not, source_table
-    may already be the name of the table. #}
+        TO_DATE (formatted_date) AS date
+      , currency
+      , adjclose AS fx_rate_usd
+      , COALESCE(
+            LEAD(formatted_date::DATE) OVER (PARTITION BY currency ORDER BY date ASC)
+            , DATEADD(day, 1, CURRENT_DATE())) AS next_date
+      , ROW_NUMBER() OVER (PARTITION BY currency ORDER BY date ASC) AS temp_partition
+    FROM rates
+    WHERE NOT NULLIF(adjclose, 0) IS NULL -- throw out rows without proper fx rate
 
-    {% if not loop.last %}
+  ), all_dates AS (
 
-      UNION ALL
+    SELECT date FROM {{ ref('gemma_dates') }} ORDER BY 1
 
-    {% endif %}
+  ), add_missing_dates AS (
 
-  {% endfor %}
+    SELECT
+        d.date
+      , rn.currency
+      , FIRST_VALUE(rn.fx_rate_usd) OVER (
+          PARTITION BY rn.currency, rn.temp_partition ORDER BY rn.date ASC
+        ) AS fx_rate_usd
+    FROM all_dates d
+      LEFT JOIN remove_nulls rn
+        ON d.date BETWEEN rn.date AND IFNULL(DATEADD(day,-1, rn.next_date), rn.date)
 
-), remove_nulls AS (
+  ), add_usd AS (
 
-  SELECT
-      TO_DATE (formatted_date) AS date
-    , currency
-    , adjclose AS fx_rate_usd
-    , COALESCE(
-          LEAD(formatted_date::DATE) OVER (PARTITION BY currency ORDER BY date ASC)
-          , DATEADD(day, 1, CURRENT_DATE())) AS next_date
-    , ROW_NUMBER() OVER (PARTITION BY currency ORDER BY date ASC) AS temp_partition
-  FROM rates
-  WHERE NOT NULLIF(adjclose, 0) IS NULL -- throw out rows without proper fx rate
+    SELECT * FROM add_missing_dates
+    UNION ALL
+    SELECT
+        date
+      , 'USD'
+      , 1
+    FROM all_dates AS mm
 
-), all_dates AS (
+  ), base_currency AS (
 
-  SELECT date FROM {{ ref('gemma_dates') }} ORDER BY 1
+    SELECT * FROM add_usd
+    WHERE currency = '{{ var("gemma:fx:base_currency")|upper() }}'
 
-), add_missing_dates AS (
+  ), final AS (
 
-  SELECT
-      d.date
-    , rn.currency
-    , FIRST_VALUE(rn.fx_rate_usd) OVER (PARTITION BY rn.currency, rn.temp_partition ORDER BY rn.date ASC) AS fx_rate_usd
-  FROM all_dates d
-    LEFT JOIN remove_nulls rn
-      ON d.date BETWEEN rn.date AND IFNULL(DATEADD(day,-1, rn.next_date), rn.date)
+    SELECT
+        au.date
+      , au.currency AS fx_currency
+      , bc.currency AS base_currency
+      , bc.fx_rate_usd / au.fx_rate_usd AS fx_rate
+    FROM add_usd AS au
+      LEFT JOIN base_currency AS bc
+        ON bc.date = au.date
 
-), add_usd AS (
+  )
 
-  SELECT * FROM add_missing_dates
-  UNION ALL
-  SELECT
-      date
-    , 'USD'
-    , 1
-  FROM all_dates AS mm
-
-), base_currency AS (
-
-  SELECT * FROM add_usd
-  WHERE currency = '{{ var("gemma:fx:base_currency")|upper() }}'
-
-), final AS (
-
-  SELECT
-      au.date
-    , au.currency AS fx_currency
-    , bc.currency AS base_currency
-    , bc.fx_rate_usd / au.fx_rate_usd AS fx_rate
-  FROM add_usd AS au
-    LEFT JOIN base_currency AS bc
-      ON bc.date = au.date
-
-)
-
-SELECT * FROM final
-ORDER BY date DESC, fx_currency ASC
+  SELECT * FROM final
+  ORDER BY date DESC, fx_currency ASC
 
 {% else %}
 
