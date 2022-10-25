@@ -197,7 +197,7 @@
       , EXTRACT(QUARTER FROM date - INTERVAL '3 month') AS previous_quarter_num
       , EXTRACT(MONTH FROM date - INTERVAL '1 month') AS previous_month_num
       , EXTRACT(WEEK FROM date) AS year_week_num
-      , EXTRACT(YEAR FROM date) || TO_CHAR(date, '-CW') || WEEKOFYEAR(date) AS year_week_name
+      , EXTRACT(YEAROFWEEKISO FROM date) || TO_CHAR(date, '-CW') || WEEKISO(date) AS year_week_name
       , DAYOFWEEKISO(date) AS weekday_num
       , DECODE(EXTRACT ('dayofweek_iso', date),
         1, 'Monday',
