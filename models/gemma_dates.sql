@@ -198,6 +198,11 @@
       , EXTRACT(MONTH FROM date - INTERVAL '1 month') AS previous_month_num
       , EXTRACT(WEEK FROM date) AS year_week_num
       , EXTRACT(YEAROFWEEKISO FROM date) || TO_CHAR(date, '-CW') || WEEKISO(date) AS year_week_name
+      , UPPER(TO_CHAR(date, 'YY-Mon')) AS year_month_yymmm
+      , EXTRACT(YEAROFWEEKISO FROM date) || TO_CHAR(date, '-CW') ||
+        RIGHT(CONCAT('0', WEEKISO(date)), 2) AS year_week_name_padded
+      , TO_CHAR(date, 'YY') || '-' || RIGHT(CONCAT('0',EXTRACT(WEEK FROM date)), 2)
+        AS year_week_yyww 
       , DAYOFWEEKISO(date) AS weekday_num
       , DECODE(EXTRACT ('dayofweek_iso', date),
         1, 'Monday',
