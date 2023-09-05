@@ -199,6 +199,7 @@
       , EXTRACT(WEEK FROM date) AS year_week_num
       , EXTRACT(YEAROFWEEKISO FROM date) || TO_CHAR(date, '-CW') || WEEKISO(date) AS year_week_name
       , UPPER(TO_CHAR(date, 'YY-Mon')) AS year_month_yymmm
+      , TO_CHAR(date, 'YY-MM') AS year_month_yymm
       , EXTRACT(YEAROFWEEKISO FROM date) || TO_CHAR(date, '-CW') ||
         RIGHT(CONCAT('0', WEEKISO(date)), 2) AS year_week_name_padded
       , RIGHT(EXTRACT(YEAROFWEEKISO FROM date),2) || '-' || 
