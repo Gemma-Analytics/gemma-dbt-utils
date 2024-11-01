@@ -1,6 +1,16 @@
 {{ config(enabled=var("gemma:fx:enabled")) }}
 
-{% if target.type == 'postgres' | as_bool() %}
+/*
+ At each dbt invocation, dbt reads all projce-related files and constructs a "manifest", 
+ used to build the DAG later on. During parsing, Jinja statements like config(), ref() 
+ or source() are evaluated. Thus, during parsing, dbt will evaluate the if-else
+ statements in this model, irrespective of whether the model is enabled or not and 
+ whether it is actually called or not. 
+ 
+ We explicitly check for whether the model is enabled, so that we can trigger an 
+ exception if the model is enabled, but an unsupported adapter is used. 
+*/
+{% if var("gemma:fx:enabled") and target.type == 'postgres' | as_bool() %}
 
 WITH rates AS (
 
@@ -81,7 +91,7 @@ WITH rates AS (
 SELECT * FROM final
 ORDER BY date DESC, fx_currency ASC
 
-{% elif target.type == 'snowflake' | as_bool() %}
+{% elif var("gemma:fx:enabled") and target.type == 'snowflake' | as_bool() %}
 
   WITH rates AS (
 
@@ -163,8 +173,8 @@ ORDER BY date DESC, fx_currency ASC
   SELECT * FROM final
   ORDER BY date DESC, fx_currency ASC
 
-{% else %}
+{% elif var("gemma:fx:enabled") %}
 
-  {% do exceptions.raise_compiler_error("This DB is not supported in gemma_fx model") %}
+  {% do exceptions.raise_compiler_error(target.type ~ " is not supported in gemma_fx model") %}
 
 {% endif %}
