@@ -271,6 +271,7 @@
         AS week_id
       -- Month that 'owns' this calendar week
       , wmm.wm_month_name AS week_assigned_month
+      , wmm.wm_month_num AS week_assigned_month_num
 
     FROM dates
       LEFT JOIN week_month_mapping AS wmm
