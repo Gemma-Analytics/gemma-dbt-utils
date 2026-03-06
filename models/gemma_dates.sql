@@ -171,7 +171,35 @@
       ) AS date
     FROM TABLE (generator(rowcount => {{ timeframe }} ))
 
-  ), final AS (
+  ), week_month_days AS (
+
+    -- For each ISO week, count how many days fall in each month
+    -- then assign the week to whichever month has the most days
+    SELECT
+        EXTRACT(YEAROFWEEKISO FROM date) AS wm_iso_year
+      , WEEKISO(date) AS wm_iso_week
+      , EXTRACT(MONTH FROM date) AS wm_month_num
+      , TO_CHAR(date, 'MMMM') AS wm_month_name
+      , COUNT(date) AS wm_days_in_month
+
+    FROM dates
+    GROUP BY 1, 2, 3, 4
+
+  ), week_month_mapping AS (
+
+    SELECT
+            wm_iso_year
+          , wm_iso_week
+          , wm_month_num
+          , wm_month_name
+          
+    FROM week_month_days
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY wm_iso_year, wm_iso_week
+        ORDER BY wm_days_in_month DESC, wm_month_num ASC
+    ) = 1
+
+), final AS (
 
     SELECT
         TO_CHAR(date, 'YYYYMMDD') AS date_id
@@ -241,8 +269,13 @@
           ORDER BY EXTRACT(YEAROFWEEKISO FROM date) ASC, EXTRACT(WEEK FROM date) ASC
         )
         AS week_id
+      -- Month that 'owns' this calendar week
+      , wmm.wm_month_name AS week_assigned_month
 
     FROM dates
+      LEFT JOIN week_month_mapping AS wmm
+        ON EXTRACT(YEAROFWEEKISO FROM date) = wmm.wm_iso_year
+        AND WEEKISO(date) = wmm.wm_iso_week
 
   )
 
