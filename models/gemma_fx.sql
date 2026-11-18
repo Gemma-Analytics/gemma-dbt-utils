@@ -10,7 +10,7 @@
  We explicitly check for whether the model is enabled, so that we can trigger an 
  exception if the model is enabled, but an unsupported adapter is used. 
 */
-{% if var("gemma:fx:enabled") and target.type == 'postgres' | as_bool() %}
+{% if var("gemma:fx:enabled") and target.type == 'postgres' %}
 
 WITH rates AS (
 
@@ -91,7 +91,7 @@ WITH rates AS (
 SELECT * FROM final
 ORDER BY date DESC, fx_currency ASC
 
-{% elif var("gemma:fx:enabled") and target.type == 'snowflake' | as_bool() %}
+{% elif var("gemma:fx:enabled") and target.type == 'snowflake' %}
 
   WITH rates AS (
 

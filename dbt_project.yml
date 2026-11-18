@@ -1,17 +1,15 @@
 config-version: 2
 
 name: 'gemma_dbt_utils'
-version: '0.5.6'
+version: '0.6.0'
 
-require-dbt-version: ">=1.0.0"
+require-dbt-version: [">=1.10.5", "<3.0.0"]
 
 profile: 'gemma_dbt_utils_profile'
 
-target-path: "target"
 clean-targets:
   - "target"
-  - "dbt_modules"
-log-path: "logs"
+  - "dbt_packages"
 macro-paths: ["macros"]
 model-paths: ["models"]
 

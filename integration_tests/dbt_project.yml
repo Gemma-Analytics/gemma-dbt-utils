@@ -5,7 +5,7 @@ version: '1.0'
 
 profile: 'integration_tests'
 
-require-dbt-version: ">=1.0.0"
+require-dbt-version: [">=1.10.5", "<3.0.0"]
 
 model-paths: ["models"]
 analysis-paths: ["analysis"]
@@ -13,10 +13,9 @@ test-paths: ["tests"]
 seed-paths: ["data"]
 macro-paths: ["macros"]
 
-target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
     - "target"
-    - "dbt_modules"
+    - "dbt_packages"
 
 vars:
   # Set variables to configure the Gemma dbt utils package

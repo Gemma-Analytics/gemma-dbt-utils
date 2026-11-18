@@ -21,7 +21,7 @@
     Sample usage:
     {{ gemma_dbt_utils.create_index_if_col_exists(this, "id", false, "brin") }}
   #}
-  {% if target.type == 'postgres' | as_bool() %}
+  {% if target.type == 'postgres' %}
     {%- set hashing_query -%}
       {# Hash index column to avoid running into postgres 63 byte identifier limit #}
       SELECT md5('{{ table_model}}_{{ column }}')
@@ -64,7 +64,7 @@
   {% endif %}
 {% endmacro %}
 
---------------------------------------------------------------------------------
+{# ------------------------------------------------------------------------ #}
 
 {%- macro post_hook_index(target_column, unique=none, method=none) -%}
 
@@ -72,7 +72,7 @@
 
 {%- endmacro -%}
 
---------------------------------------------------------------------------------
+{# ------------------------------------------------------------------------ #}
 
 {%- macro post_hook_index_id() -%}
 

@@ -14,7 +14,7 @@
    #
    #}
 
-  {% if target.type == 'postgres' | as_bool() %}
+  {% if target.type == 'postgres' %}
 
     {%- set query -%}
       {# Prepare query to get list of all columns, except exceptions #}

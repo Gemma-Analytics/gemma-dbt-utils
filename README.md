@@ -1,7 +1,14 @@
 # gemma-dbt-utils
 Gemma Analytics utilities for dbt
 
-This packages is expected to be used in addition to [dbt-utils](https://github.com/fishtown-analytics/dbt-utils) and expands upon it rather than replacing it.
+This package is expected to be used in addition to [dbt-utils](https://github.com/dbt-labs/dbt-utils) and expands upon it rather than replacing it.
+
+## Compatibility
+
+This package supports dbt `>=1.10.5` and dbt v2 (`<3.0.0`).
+
+- Generic test arguments go under the `arguments:` property (see the examples below). dbt supports this property from v1.10.5.
+- dbt v2 does not support PostgreSQL. The PostgreSQL-only macros (`select_star_except`, `create_index_if_col_exists`, `create_is_type_funcs`) and the PostgreSQL branches of the models work on dbt v1 only.
 
 ## Macros
 
@@ -108,10 +115,11 @@ models:
   - name: model_name
     columns:
       - name: a_number
-        tests:
+        data_tests:
           - gemma_dbt_utils.numeric_constraints:
-              gte: 0
-              lt: 180
+              arguments:
+                gte: 0
+                lt: 180
 ```
 
 Possible options:
@@ -134,8 +142,9 @@ models:
   - name: model_name
     columns:
       - name: a_number
-        tests:
+        data_tests:
           - gemma_dbt_utils.numeric_constraints:
-              eq: 1
-              condition: "status = 'success'"
+              arguments:
+                eq: 1
+                condition: "status = 'success'"
 ```

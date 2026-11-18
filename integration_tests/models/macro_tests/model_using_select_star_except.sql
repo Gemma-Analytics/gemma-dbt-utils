@@ -1,7 +1,7 @@
 {# only valid for PostgreSQL targets #}
 {{ config(
   materialized="table",
-  enabled=(target.type == 'postgres' | as_bool())
+  enabled=(target.type == 'postgres')
 ) }}
 
 {# Repurpose any existing model to test the macro select_star_except() #}
