@@ -163,8 +163,26 @@ The `integration_tests` folder is a dbt project that installs this package and t
 
 1. Copy `integration_tests/ci/snowflake/op_refs.example` to `integration_tests/ci/snowflake/op_refs`.
 2. In `op_refs`, replace the vault ID, the item ID and the field names with the values of your 1Password item. Git ignores `op_refs`.
+3. Create the file `integration_tests/ci/snowflake/profiles.yml` with the content below. Git ignores this file.
 
-The profile in `integration_tests/ci/snowflake/` reads all connection values from environment variables. `run.sh` sets these variables from 1Password, so the credentials never go to disk or to the terminal.
+```yaml
+integration_tests:
+  target: snowflake
+  outputs:
+    snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      private_key: "{{ env_var('SNOWFLAKE_PRIVATE_KEY') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'gemma_dbt_utils_integration_tests') }}"
+      threads: 4
+```
+
+The profile reads all connection values from environment variables. `run.sh` sets these variables from 1Password, so the credentials never go to disk or to the terminal.
 
 ### Run the tests
 

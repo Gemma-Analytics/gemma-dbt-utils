@@ -6,3 +6,4 @@ venv/
 env/
 integration_tests/ci/snowflake/op_refs
 integration_tests/ci/snowflake/.user.yml
+integration_tests/ci/snowflake/profiles.yml
