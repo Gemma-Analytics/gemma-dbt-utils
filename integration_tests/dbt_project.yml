@@ -29,7 +29,8 @@ vars:
   'gemma:fx:currencies':
     EUR: 'gemma:fx:eur'
     CHF: 'gemma:fx:chf'
-  'gemma:fx:eur': "{{ source('fx', 'eur') }}"
-  'gemma:fx:chf': "{{ source('fx', 'chf') }}"
+  # ref() instead of source(): with ref(), dbt builds gemma_fx after the seeds
+  'gemma:fx:eur': "{{ ref('models_gemma_fx_raw_data_usd_eur') }}"
+  'gemma:fx:chf': "{{ ref('models_gemma_fx_raw_data_usd_chf') }}"
   'gemma:fx:base_currency': EUR
   'gemma:fx:enabled': true

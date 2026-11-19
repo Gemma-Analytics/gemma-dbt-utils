@@ -15,13 +15,3 @@ seeds:
     description: Correct EURCHF fx rates based on USDCHF and USDEUR. Test gemma_fx with this data.
   - name: models_gemma_dates_sample_results
     description: Correct sample year_day_num and quarter_day_num. Test gemma_date with this data.
-
-sources:
-  - name: fx
-    # The seeds load into the target schema, so the source reads the seed tables from there.
-    schema: "{{ target.schema }}"
-    tables:
-      - name: eur
-        identifier: models_gemma_fx_raw_data_usd_eur
-      - name: chf
-        identifier: models_gemma_fx_raw_data_usd_chf

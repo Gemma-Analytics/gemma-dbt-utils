@@ -128,7 +128,11 @@ ORDER BY date DESC, fx_currency ASC
 
   ), all_dates AS (
 
-    SELECT date FROM {{ ref('gemma_dates') }} ORDER BY 1
+    -- Only the dates from the first rate up to today: gemma_dates also has future dates,
+    -- which have no rate yet. This matches the date range of the PostgreSQL version.
+    SELECT date
+    FROM {{ ref('gemma_dates') }}
+    WHERE date BETWEEN (SELECT MIN(date) FROM remove_nulls) AND CURRENT_DATE()
 
   ), add_missing_dates AS (
 

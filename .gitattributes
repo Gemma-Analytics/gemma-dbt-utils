@@ -1,0 +1,3 @@
+# Keep LF line endings for shell scripts and the 1Password reference files, also on Windows checkouts.
+*.sh text eol=lf
+integration_tests/ci/snowflake/op_refs* text eol=lf
