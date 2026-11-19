@@ -50,7 +50,8 @@
       {{ columns_list }}
     {%- endif -%}
 
-  {% else %}
+  {% elif execute %}
+    {# Raise only at run time: dbt v1 renders every model while it parses the project, also disabled models #}
     {# BigQuery, Snowflake will not require this macro #}
     {% do exceptions.raise_compiler_error("This macro only works for PostgreSQL") %}
   {% endif %}
