@@ -21,7 +21,7 @@ vars:
   # Set variables to configure the Gemma dbt utils package
   'gemma:dates:timezone': 'Europe/Berlin'
   'gemma:dates:enabled': true
-  'gemma:dates:start_date': '2020-01-01'
+  'gemma:dates:start_date': '2019-09-01'  # first date of the FX test data; gemma_fx uses gemma_dates on Snowflake
   'gemma:dates:end_date': '30 day'
   'gemma:dates:table': 'gemma_dates'
   'gemma:dates:schema': 'gemma_dbt_utils'

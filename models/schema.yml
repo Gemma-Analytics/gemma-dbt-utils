@@ -14,15 +14,24 @@ models:
       - name: fx_currency
         description: The source currency relating to the row's exchange rate.
         data_tests:
-          - not_null
+          - not_null:
+              config:
+                # On Snowflake, gemma_fx also has rows for future dates, which have no rate yet.
+                where: "date <= current_date"
       - name: base_currency
         description: The base currency relating to the row's exchange rate.
         data_tests:
-          - not_null
+          - not_null:
+              config:
+                # On Snowflake, gemma_fx also has rows for future dates, which have no rate yet.
+                where: "date <= current_date"
       - name: fx_rate
         description: Multiply an amount in the source currency aka fx_currency with the fx_rate to get an equivalent amount in the base currency.
         data_tests:
-          - not_null
+          - not_null:
+              config:
+                # On Snowflake, gemma_fx also has rows for future dates, which have no rate yet.
+                where: "date <= current_date"
 
   - name: gemma_dates
     description: "A calendar table: date series with one row per day."

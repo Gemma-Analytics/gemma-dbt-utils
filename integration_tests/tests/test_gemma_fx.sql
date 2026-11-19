@@ -2,12 +2,8 @@ WITH correct_results AS (
 
   SELECT
       date::DATE AS date
-    , fx_rate::NUMERIC AS fx_rate
+    , CAST(fx_rate AS DECIMAL(38, 20)) AS fx_rate
   FROM {{ ref('models_gemma_fx_result_eur_chf') }}
-
-), minmax AS (
-
-  SELECT MIN(date), MAX(date) FROM correct_results
 
 ), test AS (
 
@@ -17,7 +13,8 @@ WITH correct_results AS (
       ON gf.date = cr.date
       AND gf.fx_currency = 'CHF'
       AND gf.base_currency = 'EUR'
-  WHERE NOT COALESCE(gf.fx_rate::NUMERIC = cr.fx_rate, FALSE)
+  -- tolerance instead of exact equality: the rates are floats
+  WHERE NOT COALESCE(ABS(gf.fx_rate - cr.fx_rate) < 0.000001, FALSE)
 
 )
 SELECT * FROM test
