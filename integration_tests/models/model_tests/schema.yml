@@ -3,22 +3,15 @@ version: 2
 seeds:
   - name: models_gemma_fx_raw_data_usd_chf
     description: Sample raw FX rates from Yahoo Finance (USDCHF)
+    config:
+      # Keep the lowercase column names of the raw FX data, which gemma_fx reads quoted on Snowflake.
+      quote_columns: true
   - name: models_gemma_fx_raw_data_usd_eur
     description: Sample raw FX rates from Yahoo Finance (USDEUR)
+    config:
+      # Keep the lowercase column names of the raw FX data, which gemma_fx reads quoted on Snowflake.
+      quote_columns: true
   - name: models_gemma_fx_result_eur_chf
     description: Correct EURCHF fx rates based on USDCHF and USDEUR. Test gemma_fx with this data.
   - name: models_gemma_dates_sample_results
     description: Correct sample year_day_num and quarter_day_num. Test gemma_date with this data.
-
-sources:
-  - name: fx
-    quoting:
-      database: true
-      schema: true
-      identifier: true
-    schema: integration_tests # appropriate seed files as models for tests
-    tables:
-      - name: eur
-        identifier: models_gemma_fx_raw_data_usd_eur
-      - name: chf
-        identifier: models_gemma_fx_raw_data_usd_chf

@@ -4,11 +4,13 @@ seeds:
   - name: data_test_numeric_constraints
     columns:
     - name: vat_pct
-      tests:
+      data_tests:
         - gemma_dbt_utils.numeric_constraints:
-            gte: 0
-            ne: 0.5
-            lt: 1
+            arguments:
+              gte: 0
+              ne: 0.5
+              lt: 1
         - gemma_dbt_utils.numeric_constraints:
-            eq: 0
-            condition: "(status = 'done') and (type = 'international')"
+            arguments:
+              eq: 0
+              condition: "(status = 'done') and (type = 'international')"

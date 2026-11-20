@@ -21,7 +21,7 @@
     Sample usage:
     {{ gemma_dbt_utils.create_index_if_col_exists(this, "id", false, "brin") }}
   #}
-  {% if target.type == 'postgres' | as_bool() %}
+  {% if target.type == 'postgres' %}
     {%- set hashing_query -%}
       {# Hash index column to avoid running into postgres 63 byte identifier limit #}
       SELECT md5('{{ table_model}}_{{ column }}')
@@ -58,13 +58,14 @@
     END IF;
     END
     $$;
-  {% else %}
+  {% elif execute %}
+    {# Raise only at run time: dbt v1 renders every model while it parses the project, also disabled models #}
     {# BigQuery, Snowflake, Redshift will not require this macro #}
     {% do exceptions.raise_compiler_error("This macro only works for PostgreSQL") %}
   {% endif %}
 {% endmacro %}
 
---------------------------------------------------------------------------------
+{# ------------------------------------------------------------------------ #}
 
 {%- macro post_hook_index(target_column, unique=none, method=none) -%}
 
@@ -72,7 +73,7 @@
 
 {%- endmacro -%}
 
---------------------------------------------------------------------------------
+{# ------------------------------------------------------------------------ #}
 
 {%- macro post_hook_index_id() -%}
 

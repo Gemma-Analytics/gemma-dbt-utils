@@ -1,0 +1,10 @@
+# 1Password references for ci/snowflake/run.sh. One variable per line: NAME=op://<vault_id>/<item_id>/<field>
+# Copy this file to op_refs (git ignores op_refs) and replace the IDs and field names with your own.
+# Use IDs, not titles: titles with ":" or "'" break op:// references.
+SNOWFLAKE_ACCOUNT=op://<vault_id>/<item_id>/account
+SNOWFLAKE_USER=op://<vault_id>/<item_id>/username
+SNOWFLAKE_PRIVATE_KEY=op://<vault_id>/<item_id>/<private_key_file>.p8
+SNOWFLAKE_PRIVATE_KEY_PASSPHRASE=op://<vault_id>/<item_id>/<passphrase_field>
+SNOWFLAKE_ROLE=op://<vault_id>/<item_id>/role
+SNOWFLAKE_WAREHOUSE=op://<vault_id>/<item_id>/warehouse
+SNOWFLAKE_DATABASE=op://<vault_id>/<item_id>/database

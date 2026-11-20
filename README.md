@@ -1,7 +1,14 @@
 # gemma-dbt-utils
 Gemma Analytics utilities for dbt
 
-This packages is expected to be used in addition to [dbt-utils](https://github.com/fishtown-analytics/dbt-utils) and expands upon it rather than replacing it.
+This package is expected to be used in addition to [dbt-utils](https://github.com/dbt-labs/dbt-utils) and expands upon it rather than replacing it.
+
+## Compatibility
+
+This package supports dbt `>=1.10.5` and dbt v2 (`<3.0.0`).
+
+- Generic test arguments go under the `arguments:` property (see the examples below). dbt supports this property from v1.10.5.
+- dbt v2 does not support PostgreSQL. The PostgreSQL-only macros (`select_star_except`, `create_index_if_col_exists`, `create_is_type_funcs`) and the PostgreSQL branches of the models work on dbt v1 only.
 
 ## Macros
 
@@ -108,10 +115,11 @@ models:
   - name: model_name
     columns:
       - name: a_number
-        tests:
+        data_tests:
           - gemma_dbt_utils.numeric_constraints:
-              gte: 0
-              lt: 180
+              arguments:
+                gte: 0
+                lt: 180
 ```
 
 Possible options:
@@ -134,8 +142,56 @@ models:
   - name: model_name
     columns:
       - name: a_number
-        tests:
+        data_tests:
           - gemma_dbt_utils.numeric_constraints:
-              eq: 1
-              condition: "status = 'success'"
+              arguments:
+                eq: 1
+                condition: "status = 'success'"
 ```
+
+## Testing
+
+The `integration_tests` folder is a dbt project that installs this package and tests the macros, models and schema tests. No CI runs these tests. Run them on Snowflake with dbt v2 before you merge a change.
+
+### Prerequisites
+
+- The dbt v2 CLI. The installer puts the binary at `~/.local/bin/dbt`.
+- The 1Password CLI (`op`), signed in.
+- A 1Password item with your Snowflake login. The item needs these fields: `account`, `username`, `role`, `warehouse`, `database`, the key passphrase, and the private key as an attached `.p8` file.
+
+### Set up
+
+1. Copy `integration_tests/ci/snowflake/op_refs.example` to `integration_tests/ci/snowflake/op_refs`.
+2. In `op_refs`, replace the vault ID, the item ID and the field names with the values of your 1Password item. Git ignores `op_refs`.
+3. Create the file `integration_tests/ci/snowflake/profiles.yml` with the content below. Git ignores this file.
+
+```yaml
+integration_tests:
+  target: snowflake
+  outputs:
+    snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      private_key: "{{ env_var('SNOWFLAKE_PRIVATE_KEY') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'gemma_dbt_utils_integration_tests') }}"
+      threads: 4
+```
+
+The profile reads all connection values from environment variables. `run.sh` sets these variables from 1Password, so the credentials never go to disk or to the terminal.
+
+### Run the tests
+
+Run these commands from the `integration_tests` folder:
+
+1. Check the connection: `./ci/snowflake/run.sh debug`
+2. Install the package: `./ci/snowflake/run.sh deps`
+3. Build and test everything: `./ci/snowflake/run.sh build --full-refresh`
+
+dbt writes the test tables to the schema `gemma_dbt_utils_integration_tests` in your database. To use a different schema, set `SNOWFLAKE_SCHEMA` before you run the script.
+
+The PostgreSQL-only macros are not tested, because dbt v2 does not support PostgreSQL.

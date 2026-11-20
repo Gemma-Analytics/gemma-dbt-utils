@@ -17,7 +17,7 @@ cp ci/sample.profiles.yml ~/.dbt/profiles.yml
 
 _models=""
 _seeds="--full-refresh"
-if [[ ! -z $2 ]]; then _models="--models $2"; fi
+if [[ ! -z $2 ]]; then _models="--select $2"; fi
 if [[ ! -z $3 ]]; then _seeds="--select $3 --full-refresh"; fi
 
 dbt deps --target $1

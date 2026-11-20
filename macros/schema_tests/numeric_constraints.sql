@@ -1,13 +1,4 @@
-{% macro test_numeric_constraints(model, condition='true') %}
-
-{% set column_name = kwargs.get('column_name', kwargs.get('arg')) %}
-{% set eq = kwargs.get('eq', kwargs.get('arg')) %}
-{% set ne = kwargs.get('ne', kwargs.get('arg')) %}
-{% set gt = kwargs.get('gt', kwargs.get('arg')) %}
-{% set gte = kwargs.get('gte', kwargs.get('arg')) %}
-{% set lt = kwargs.get('lt', kwargs.get('arg')) %}
-{% set lte = kwargs.get('lte', kwargs.get('arg')) %}
-
+{% test numeric_constraints(model, column_name, condition='true', eq=none, ne=none, gt=none, gte=none, lt=none, lte=none) %}
 
 with meet_condition as (
 
@@ -20,17 +11,18 @@ validation_errors as (
         *
     from meet_condition
     where not (true
-      {% if eq is not none %} and {{column_name}} = {{ eq or 0 }} {% endif %}
-      {% if ne is not none %} and {{column_name}} <> {{ ne or 0 }} {% endif %}
-      {% if gt is not none %} and {{column_name}} > {{ gt or 0 }} {% endif %}
-      {% if gte is not none %} and {{column_name}} >= {{ gte or 0 }} {% endif %}
-      {% if lt is not none %} and {{column_name}} < {{ lt or 0 }} {% endif %}
-      {% if lte is not none %} and {{column_name}} <= {{ lte or 0 }} {% endif %}
+      {% if eq is not none %} and {{ column_name }} = {{ eq }} {% endif %}
+      {% if ne is not none %} and {{ column_name }} <> {{ ne }} {% endif %}
+      {% if gt is not none %} and {{ column_name }} > {{ gt }} {% endif %}
+      {% if gte is not none %} and {{ column_name }} >= {{ gte }} {% endif %}
+      {% if lt is not none %} and {{ column_name }} < {{ lt }} {% endif %}
+      {% if lte is not none %} and {{ column_name }} <= {{ lte }} {% endif %}
     )
 
 )
 
-select * -- from dbt 0.20.0 on, tests fail if any row is returned
+-- the test fails if any row is returned
+select *
 from validation_errors
 
-{% endmacro %}
+{% endtest %}

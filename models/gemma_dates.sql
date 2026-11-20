@@ -3,7 +3,7 @@
           enabled = var("gemma:dates:enabled")
 ) }}
 
-{% if target.type == 'postgres' | as_bool() %}
+{% if target.type == 'postgres' %}
 
   WITH dates AS (
 
@@ -77,7 +77,7 @@
 
   SELECT * FROM final
 
-{% elif target.type == 'bigquery' | as_bool() %}
+{% elif target.type == 'bigquery' %}
 
   WITH dates AS (
 
@@ -139,7 +139,7 @@
 
   SELECT * FROM final
 
-{% elif target.type == 'snowflake' | as_bool() %}
+{% elif target.type == 'snowflake' %}
 
   {% set timeframe_query %}
   SELECT
@@ -149,11 +149,9 @@
     + 1
   {% endset %}
 
-  {% set timeframe_result = run_query(timeframe_query) %}
-
   {% if execute %}
 
-    {% set timeframe = timeframe_result.columns[0].values()[0] %}
+    {% set timeframe = run_query(timeframe_query).columns[0].values()[0] %}
 
   {% else %}
 

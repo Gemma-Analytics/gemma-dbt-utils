@@ -4,6 +4,9 @@
  #  number of columns.
  #}
 
+{# only valid for PostgreSQL targets: the tested model is disabled on other targets #}
+{{ config(enabled=(target.type == 'postgres')) }}
+
 {% set src = ref("model_using_select_star_except") %}
 
 SELECT *
